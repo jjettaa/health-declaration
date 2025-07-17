@@ -38,7 +38,7 @@ export class HealthForm implements OnInit {
     private stepControls: Record<number, string[]> = {
     1: ['height', 'weight'],
     2: ['medication', 'medicationName', 'medicationReason', 'conditions'],
-    // 3: ['allergies', 'reaction'],   // and so on…
+    3: ['hadIllness', 'illnesses'],
   };
 
   constructor(private fb: FormBuilder) {}
@@ -49,7 +49,7 @@ export class HealthForm implements OnInit {
       weight: ['', [Validators.required, Validators.min(1)]],
 
       // Q2
-      medication: [null, Validators.required],      
+      medication: [null, Validators.required],     
       medicationDetails: [''],
       medicationName: ['', Validators.required],
       medicationReason: ['', Validators.required],  
