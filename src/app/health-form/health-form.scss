@@ -1,5 +1,5 @@
 .page-wrapper {
-  padding: 5px;          
+  padding: 5px 5px; 
   display: flex;
   justify-content: center; 
 }
@@ -8,7 +8,8 @@
   width: 100%;
   max-width: 600px;     
   background: #fff;
-  padding: 16px;           
+  padding: 16px;
+  box-sizing: border-box;           
 }
 
 .health-form-header {
@@ -45,6 +46,7 @@
     margin: 0;
     box-shadow: none;
     overflow: hidden;
+    margin-bottom: 16px;
   }
 
   .mat-expansion-panel-header {
@@ -57,7 +59,7 @@
 
     .mat-expansion-panel-header-title {
       color: #000 !important;
-      font-size: 15px;
+      font-size: 14.5px;
     }
 
     .mat-expansion-indicator {
@@ -86,14 +88,16 @@
 .field-row {
   display: flex;
   gap: 12px;
-  align-items: center;           
+  flex-wrap: wrap;
+  align-items: flex-start;         
 }
 
 .field-row > mat-form-field {
-  flex: 0 0 auto;             
-  width: 150px;               
-  max-width: 100%;             
+  flex: 1 1 0;
+  min-width: 120px;
+  max-width: 100%;
 }
+
 
 ::ng-deep .step-content .mat-mdc-text-field-wrapper.mdc-text-field {
   height: 35px !important;
@@ -311,11 +315,19 @@ background-color: rgba(255, 218, 185, 0.15) !important;
   .mat-button-toggle-button {
     border-left: none !important;
 }
-.field-row > div > mat-form-field {
-  flex: 0 0 auto;
-  width: 150px;
-  max-width: 100%;
+
+.field-row > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 120px;
 }
+
+.field-row > div > mat-form-field {
+  width: 100%;
+}
+
+
 
 .condition-header {
   display: flex;
@@ -345,11 +357,6 @@ background-color: rgba(255, 218, 185, 0.15) !important;
   
 }
 
-.field-row > mat-form-field {
-  flex: 0 0 auto;
-  width: 150px;
-  max-width: 100%;
-}
 
 .field-row > mat-form-field.full-row {
   flex: 1 1 auto;    
@@ -371,21 +378,25 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 }
 
 ::ng-deep .field-row.address-row {
-  display: flex;      
+  display: flex;
   gap: 12px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
 }
 
-::ng-deep .field-row.address-row > div:first-child > mat-form-field {
-  flex: 0 0 200px !important;
-  width: 200px       !important;
-  max-width: 200px   !important;
+::ng-deep .field-row.address-row > div:first-child {
+  flex: 7;
 }
 
-::ng-deep .field-row.address-row > div:last-child > mat-form-field {
-  flex: 0 0 100px !important;
-  width: 100px     !important;
-  max-width: 100px !important;
+::ng-deep .field-row.address-row > div:last-child {
+  flex: 3;
 }
+
+::ng-deep .field-row.address-row > div > mat-form-field {
+  width: 100%;
+}
+
+
 
 .add-condition-btn {
   height: 35px;

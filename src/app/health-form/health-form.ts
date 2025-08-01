@@ -39,6 +39,7 @@ export class HealthForm implements OnInit {
     1: ['height', 'weight'],
     2: ['medication', 'medicationName', 'medicationReason', 'conditions'],
     3: ['hadIllness', 'illnesses'],
+    4: ['treatments', 'treatmentDetails'],
   };
 
   constructor(private fb: FormBuilder) {}
@@ -58,11 +59,31 @@ export class HealthForm implements OnInit {
       // Q3 
       hadIllness:       [null, Validators.required],    
       illnesses:        this.fb.array([]),
+
+      //Q4
+      treatments: [null, Validators.required],  // toggle (ja/nein)
+      treatmentDetails: this.fb.array([]) ,      // FormArray if “ja”
+      hospitalTreatment: [null],
+      doctorTreatment: [null],
+      treatmentPsychologist: [null, Validators.required],
+      treatmentAlternative: [null, Validators.required],
+
+      //Q5
+      doctorInfo: this.fb.group({
+      doctorName: ['', Validators.required],
+      doctorLastName: ['', Validators.required],
+      doctorStreet: ['', Validators.required],
+      doctorStreetNo: ['', Validators.required],
+      doctorCity: ['', Validators.required]
+  })
+
+
   });
 
     this.addCondition();   
-
     this.addIllness();
+    this.addTreatment();
+
 
   }
 
@@ -114,12 +135,56 @@ addIllness() {
     this.illnessesArray.removeAt(index);
   }
 
+ get treatmentDetailsArray(): FormArray {
+  return this.form.get('treatmentDetails') as FormArray;
+}
+addTreatment() {
+  const group = this.fb.group({
+    description:     ['', Validators.required],
+    startDate:       [null, Validators.required],
+    endDate:         [null],
+    operated:        [null, Validators.required],
+    recovered:       [null, Validators.required],
+    doctorName:      ['', Validators.required],
+    doctorLastName:  ['', Validators.required],
+    doctorStreet:    ['', Validators.required],
+    doctorStreetNo:  ['', Validators.required],
+    doctorCity:      ['', Validators.required]
+  });
+  this.treatmentDetailsArray.push(group);
+}
+
+removeTreatment(index: number) {
+  this.treatmentDetailsArray.removeAt(index);
+}
+
 goTo(step: number) {
   const controls = this.stepControls[this.currentStep] || [];
   let stepInvalid = false;
 
-  // 1) mark only this step’s controls as touched
+  const medicationValue = this.form.get('medication')?.value;
+  const hadIllnessValue = this.form.get('hadIllness')?.value;
+  const treatmentsValue = this.form.get('treatments')?.value;
+
   for (const name of controls) {
+    // Skip Q2 fields
+    if (
+      medicationValue === 'no' &&
+      ['medicationName', 'medicationReason', 'conditions'].includes(name)
+    ) continue;
+
+    // Skip Q3 fields
+    if (
+      hadIllnessValue === 'no' &&
+      ['illnesses'].includes(name)
+    ) continue;
+
+    // Skip Q4 fields
+    if (
+      treatmentsValue === 'no' &&
+      ['treatmentDetails'].includes(name)
+    ) continue;
+
     const ctrl = this.form.get(name);
     if (!ctrl) continue;
 
@@ -134,8 +199,22 @@ goTo(step: number) {
     }
   }
 
-  // 2) check validity of just this step
   for (const name of controls) {
+    if (
+      medicationValue === 'no' &&
+      ['medicationName', 'medicationReason', 'conditions'].includes(name)
+    ) continue;
+
+    if (
+      hadIllnessValue === 'no' &&
+      ['illnesses'].includes(name)
+    ) continue;
+
+    if (
+      treatmentsValue === 'no' &&
+      ['treatmentDetails'].includes(name)
+    ) continue;
+
     const ctrl = this.form.get(name);
     if (ctrl && ctrl.invalid) {
       stepInvalid = true;
@@ -143,13 +222,13 @@ goTo(step: number) {
     }
   }
 
-  // 3) stop or advance
-  if (stepInvalid) {
-    return;
+  if (!stepInvalid) {
+    this.currentStep = step;
   }
-
-  this.currentStep = step;
 }
+
+
+
 
 
 }

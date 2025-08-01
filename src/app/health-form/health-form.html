@@ -604,11 +604,398 @@ Diese Aufzählung ist nicht abschliessend.
   </div>
 
     <div class="panel-actions">
-      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(3)">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(4)">
         Weiter
       </button>
     </div>
   </mat-expansion-panel>
+
+  
+ <!-- QUESTION 4 -->
+<mat-expansion-panel *ngIf="currentStep >= 4">
+  <mat-expansion-panel-header>
+    <mat-panel-title>4. Behandlungen - durchgefuhrte oder geplante Spitalaufenthalte/Operationen</mat-panel-title>
+  </mat-expansion-panel-header>
+
+<div class="step-content">
+  <!-- Toggle group for Yes/No -->
+  <mat-button-toggle-group
+    formControlName="treatments"
+    class="med-toggle-group"
+    [class.selected]="form.get('treatments')?.value !== null"
+    aria-label="Behandlungen Ja/Nein"
+  >
+    <mat-button-toggle value="no">Nein</mat-button-toggle>
+    <mat-button-toggle value="yes">Ja</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('treatments')!.hasError('required') && form.get('treatments')!.touched && currentStep === 4"
+  >
+    Bitte Ja oder Nein auswählen
+  </mat-error>
+
+  <div *ngIf="form.get('treatments')?.value === 'yes'" class="step-content">
+
+    <p class="subtitle">
+   Haben Sie sich in den letzten fl.inf Jahren einer Operation unterzogen, fand ein Spitalaufenthalt statt oder 
+   haben Sie sich einer (medizinischen oder therapeutischen) Behandlung unterzogen 
+   oder beabsichtigen Sie, sich einer Konsultation, Behandlung oder Operation zu unterziehen?
+  </p>
+      
+      <!-- a) Hospital Treatment -->
+      <p class="subtitle"><b>a)</b> In einem Spital, einer Kureinrichtung oder einer Entzugsklinik?</p>
+      <mat-button-toggle-group
+        formControlName="hospitalTreatment"
+        class="med-toggle-group"
+        aria-label="Spital?"
+      >
+        <mat-button-toggle value="no">Nein</mat-button-toggle>
+        <mat-button-toggle value="yes">Ja</mat-button-toggle>
+      </mat-button-toggle-group>
+      <mat-error *ngIf="form.get('hospitalTreatment')?.touched && form.get('hospitalTreatment')?.hasError('required')">
+        Bitte auswählen
+      </mat-error>
+
+      <!-- b) Doctor Treatment -->
+      <p class="subtitle"><b>b)</b> Bei einem Arzt, Physiotherapeuten oder Chiropraktiker?</p>
+      <mat-button-toggle-group
+        formControlName="doctorTreatment"
+        class="med-toggle-group"
+        aria-label="Arzt?"
+      >
+        <mat-button-toggle value="no">Nein</mat-button-toggle>
+        <mat-button-toggle value="yes">Ja</mat-button-toggle>
+      </mat-button-toggle-group>
+      <mat-error *ngIf="form.get('doctorTreatment')?.touched && form.get('doctorTreatment')?.hasError('required')">
+        Bitte auswählen
+      </mat-error>
+
+      <!-- Repeatable Treatment Details -->
+<div formArrayName="treatmentDetails" class="conditions-list">
+  <div
+    *ngFor="let treatGroup of treatmentDetailsArray.controls; let i = index"
+    [formGroupName]="i"
+    class="condition-entry"
+  >
+    <!-- Header with remove -->
+      <div class="condition-header">
+        <h3 class="condition-title">{{ i + 1 }}) Krankheit erfassen</h3>
+        <a mat-button color="warn" class="remove-btn" (click)="removeIllness(i)">
+          – Entfernen
+        </a>
+      </div>
+
+
+    <!-- Subtitle -->
+    <p class="subtitle">
+      Krankheit, Leiden, Unfall, Behandlungsgrund, betroffene Stelle am Körper (links, rechts)
+    </p>
+
+    <!-- Description textarea -->
+<div class="field-row">
+<mat-form-field
+  appearance="outline"
+  [class.filled]="!!treatGroup.get('description')?.value"
+  class="full-row"
+>
+  <span matPrefix class="prefix-spacer"></span>
+  <input
+    matInput
+    formControlName="description"
+    placeholder="Ihre Eingabe"
+    type="text"
+  />
+  <!-- only show the “required” error once the control is touched -->
+  <mat-error *ngIf="
+    treatGroup.get('description')!.touched
+    && treatGroup.get('description')!.hasError('required')
+  ">
+    Erforderlich
+  </mat-error>
+</mat-form-field>
+
+</div>
+
+    <!-- Date pickers -->
+<div class="field-row">
+  <!-- Beginn -->
+  <div class="date-field">
+    <p class="subtitle">Beginndatum</p>
+    <mat-form-field appearance="outline"
+                    [class.filled]="!!treatGroup.get('startDate')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input
+        matInput
+        [matDatepicker]="startPicker"
+        formControlName="startDate"
+        placeholder="MM.TT.JJJJ"
+      />
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+      <mat-error
+        *ngIf="
+          treatGroup.get('startDate')!.touched
+          && treatGroup.get('startDate')!.hasError('required')">
+        Erforderlich
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <!-- Ende -->
+  <div class="date-field">
+    <p class="subtitle">Enddatum</p>
+    <mat-form-field appearance="outline"
+                    [class.filled]="!!treatGroup.get('endDate')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input
+        matInput
+        [matDatepicker]="endPicker"
+        formControlName="endDate"
+        placeholder="MM.TT.JJJJ"
+      />
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+      <!-- optional mat-error if you add Validators.required -->
+    </mat-form-field>
+  </div>
+</div>
+
+
+<p class="subtitle">Operiert?</p>
+<mat-button-toggle-group
+  formControlName="operated"
+  class="med-toggle-group"
+  [class.selected]="treatGroup.get('operated')?.value !== null"
+  aria-label="Operiert?"
+>
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+</mat-button-toggle-group>
+
+<mat-error class="toggle-error"
+           *ngIf="treatGroup.get('operated')!.invalid && treatGroup.get('operated')!.touched">
+  Bitte Ja oder Nein auswählen
+</mat-error>
+
+<!-- Genesen? -->
+<p class="subtitle">Behandlung beendet, genesen ohne Folgen</p>
+<mat-button-toggle-group
+  formControlName="recovered"
+  class="med-toggle-group"
+  [class.selected]="treatGroup.get('recovered')?.value !== null"
+  aria-label="Genesen?"
+>
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+</mat-button-toggle-group>
+
+<mat-error class="toggle-error"
+           *ngIf="treatGroup.get('recovered')!.invalid && treatGroup.get('recovered')!.touched">
+  Bitte Ja oder Nein auswählen
+</mat-error>
+
+    <!-- Arztadresse -->
+    <p class="subtitle">Name und Adresse des Arztes, Spitals oder anderen Leistungserbringers</p>
+<!-- replace your name/street row with this -->
+<div class="field-row">
+  <!-- Name -->
+  <div>
+    <mat-form-field appearance="outline" [class.filled]="!!treatGroup.get('doctorName')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input matInput formControlName="doctorName" placeholder="Name" />
+      <mat-error *ngIf="treatGroup.get('doctorName')?.touched && treatGroup.get('doctorName')?.hasError('required')">
+        Erforderlich
+      </mat-error>
+    </mat-form-field>
+  </div>
+
+  <!-- Straße -->
+  <div>
+    <mat-form-field appearance="outline" [class.filled]="!!treatGroup.get('doctorLastName')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input matInput formControlName="doctorLastName" placeholder="Straße" />
+      <mat-error *ngIf="treatGroup.get('doctorLastName')?.touched && treatGroup.get('doctorLastName')?.hasError('required')">
+        Erforderlich
+      </mat-error>
+    </mat-form-field>
+  </div>
+</div>
+
+<div class="field-row address-row">
+  <div >
+    <mat-form-field appearance="outline" class="street-col" [class.filled]="!!treatGroup.get('doctorStreet')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input matInput formControlName="doctorStreet" placeholder="Doktorstrasse" />
+        <mat-error *ngIf="
+    treatGroup.get('doctorStreet')!.touched
+    && treatGroup.get('doctorStreet')!.hasError('required')
+  ">
+    Erforderlich
+  </mat-error>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field appearance="outline" class="number-col"[class.filled]="!!treatGroup.get('doctorStreetNo')?.value">
+      <span matPrefix class="prefix-spacer"></span>
+      <input matInput formControlName="doctorStreetNo" placeholder="Nr." />
+        <mat-error *ngIf="
+    treatGroup.get('doctorStreetNo')!.touched
+    && treatGroup.get('doctorStreetNo')!.hasError('required')
+  ">
+    Erforderlich
+  </mat-error>
+    </mat-form-field>
+  </div>
+</div>
+
+<div class="field-row">
+<mat-form-field
+  appearance="outline"
+  [class.filled]="!!treatGroup.get('doctorCity')?.value"
+  class="full-row"
+>
+  <span matPrefix class="prefix-spacer"></span>
+  <input
+    matInput
+    formControlName="doctorCity"
+    placeholder="PLZ"
+    type="text"
+  />
+  <!-- only show the “required” error once the control is touched -->
+  <mat-error *ngIf="
+    treatGroup.get('doctorCity')!.touched
+    && treatGroup.get('doctorCity')!.hasError('required')
+  ">
+    Erforderlich
+  </mat-error>
+</mat-form-field>
+
+</div>
+
+  </div>
+</div>
+
+  <div class="panel-actions">
+    <button mat-flat-button color="primary" class="add-condition-btn" (click)="addTreatment()">
+      + Krankheit erfassen
+    </button>
+  </div>
+
+   <!-- Psychologist Treatment -->
+      <p class="subtitle"><b>c)</b> Bei einem Psychiater, Psychologen oder Psychotherapeuten</p>
+      <mat-button-toggle-group
+        formControlName="treatmentPsychologist"
+        class="med-toggle-group"
+        aria-label="Spital?"
+      >
+        <mat-button-toggle value="no">Nein</mat-button-toggle>
+        <mat-button-toggle value="yes">Ja</mat-button-toggle>
+      </mat-button-toggle-group>
+      <mat-error *ngIf="form.get('treatmentPsychologist')?.touched && form.get('treatmentPsychologist')?.hasError('required')">
+        Bitte auswählen
+      </mat-error>
+
+      <!-- Alternative Treatment -->
+      <p class="subtitle"><b>d)</b> Bei einem Naturheilpraktiker, einem nichtmedizinischen Therapeuten, einem Therapeuten für Naturheilkunde oder einem Osteopathen</p>
+      <mat-button-toggle-group
+        formControlName="treatmentAlternative"
+        class="med-toggle-group"
+        aria-label="Arzt?"
+      >
+        <mat-button-toggle value="no">Nein</mat-button-toggle>
+        <mat-button-toggle value="yes">Ja</mat-button-toggle>
+      </mat-button-toggle-group>
+      <mat-error *ngIf="form.get('treatmentAlternative')?.touched && form.get('treatmentAlternative')?.hasError('required')">
+        Bitte auswählen
+      </mat-error>
+</div>
+  </div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(5)">
+        Weiter
+      </button>
+    </div>
+</mat-expansion-panel>
+
+<!-- QUESTION 5 -->
+<mat-expansion-panel *ngIf="currentStep >= 5">
+  <mat-expansion-panel-header>
+    <mat-panel-title>5. Arzt</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <!-- Wrap the entire content in formGroupName -->
+  <div class="step-content" [formGroupName]="'doctorInfo'">
+
+    <p class="subtitle">
+      Name und Adresse des Arztes, den Sie gewöhnlich aufsuchen:
+    </p>
+
+    <div class="field-row">
+      <div>
+        <mat-form-field appearance="outline">
+          <span matPrefix class="prefix-spacer"></span>
+          <input matInput formControlName="doctorName" placeholder="Name" />
+          <mat-error *ngIf="form.get('doctorInfo.doctorName')?.touched && form.get('doctorInfo.doctorName')?.hasError('required')">
+            Erforderlich
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field appearance="outline">
+          <span matPrefix class="prefix-spacer"></span>
+          <input matInput formControlName="doctorLastName" placeholder="Straße" />
+          <mat-error *ngIf="form.get('doctorInfo.doctorLastName')?.touched && form.get('doctorInfo.doctorLastName')?.hasError('required')">
+            Erforderlich
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="field-row address-row">
+      <div>
+        <mat-form-field appearance="outline" class="street-col">
+          <span matPrefix class="prefix-spacer"></span>
+          <input matInput formControlName="doctorStreet" placeholder="Doktorstrasse" />
+          <mat-error *ngIf="form.get('doctorInfo.doctorStreet')?.touched && form.get('doctorInfo.doctorStreet')?.hasError('required')">
+            Erforderlich
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div>
+        <mat-form-field appearance="outline" class="number-col">
+          <span matPrefix class="prefix-spacer"></span>
+          <input matInput formControlName="doctorStreetNo" placeholder="Nr." />
+          <mat-error *ngIf="form.get('doctorInfo.doctorStreetNo')?.touched && form.get('doctorInfo.doctorStreetNo')?.hasError('required')">
+            Erforderlich
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <mat-form-field appearance="outline" class="full-row">
+        <span matPrefix class="prefix-spacer"></span>
+        <input matInput formControlName="doctorCity" placeholder="PLZ" type="text" />
+        <mat-error *ngIf="form.get('doctorInfo.doctorCity')?.touched && form.get('doctorInfo.doctorCity')?.hasError('required')">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+  </div>
+
+  <div class="panel-actions">
+    <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(6)">
+      Weiter
+    </button>
+  </div>
+</mat-expansion-panel>
+
+
     </mat-accordion>
   </form>
 </div>
