@@ -67,7 +67,7 @@
       </mat-expansion-panel>
 
 <!-- QUESTIIOOONN 2 -->
-    <mat-expansion-panel *ngIf="currentStep >= 2" #panel2>
+    <mat-expansion-panel *ngIf="currentStep >= 2" [expanded]="currentStep === 2" id="panel-2">
     <mat-expansion-panel-header>
       <mat-panel-title>2. Medikamente oder Hilfsmittel</mat-panel-title>
     </mat-expansion-panel-header>
@@ -359,7 +359,7 @@
   </mat-expansion-panel>
 
   <!-- QUESTIIOOONN 3 -->
-    <mat-expansion-panel *ngIf="currentStep >= 3" #panel2>
+    <mat-expansion-panel *ngIf="currentStep >= 3" [expanded]="currentStep === 3" id="panel-3">
     <mat-expansion-panel-header>
       <mat-panel-title>3. Krankheiten oder Beschwerden</mat-panel-title>
     </mat-expansion-panel-header>
@@ -612,7 +612,7 @@ Diese Aufzählung ist nicht abschliessend.
 
   
  <!-- QUESTION 4 -->
-<mat-expansion-panel *ngIf="currentStep >= 4">
+<mat-expansion-panel *ngIf="currentStep >= 4" [expanded]="currentStep === 4" id="panel-4">
   <mat-expansion-panel-header>
     <mat-panel-title>4. Behandlungen - durchgefuhrte oder geplante Spitalaufenthalte/Operationen</mat-panel-title>
   </mat-expansion-panel-header>
@@ -757,7 +757,7 @@ Diese Aufzählung ist nicht abschliessend.
       />
       <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
       <mat-datepicker #endPicker></mat-datepicker>
-      <!-- optional mat-error if you add Validators.required -->
+    
     </mat-form-field>
   </div>
 </div>
@@ -921,12 +921,11 @@ Diese Aufzählung ist nicht abschliessend.
 </mat-expansion-panel>
 
 <!-- QUESTION 5 -->
-<mat-expansion-panel *ngIf="currentStep >= 5">
+<mat-expansion-panel *ngIf="currentStep >= 5" [expanded]="currentStep === 5">
   <mat-expansion-panel-header>
     <mat-panel-title>5. Arzt</mat-panel-title>
   </mat-expansion-panel-header>
 
-  <!-- Wrap the entire content in formGroupName -->
   <div class="step-content" [formGroupName]="'doctorInfo'">
 
     <p class="subtitle">
@@ -935,7 +934,7 @@ Diese Aufzählung ist nicht abschliessend.
 
     <div class="field-row">
       <div>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" [class.filled]="!!form.get('doctorInfo.doctorName')?.value">
           <span matPrefix class="prefix-spacer"></span>
           <input matInput formControlName="doctorName" placeholder="Name" />
           <mat-error *ngIf="form.get('doctorInfo.doctorName')?.touched && form.get('doctorInfo.doctorName')?.hasError('required')">
@@ -945,7 +944,7 @@ Diese Aufzählung ist nicht abschliessend.
       </div>
 
       <div>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" [class.filled]="!!form.get('doctorInfo.doctorLastName')?.value">
           <span matPrefix class="prefix-spacer"></span>
           <input matInput formControlName="doctorLastName" placeholder="Straße" />
           <mat-error *ngIf="form.get('doctorInfo.doctorLastName')?.touched && form.get('doctorInfo.doctorLastName')?.hasError('required')">
@@ -957,7 +956,7 @@ Diese Aufzählung ist nicht abschliessend.
 
     <div class="field-row address-row">
       <div>
-        <mat-form-field appearance="outline" class="street-col">
+        <mat-form-field appearance="outline" class="street-col" [class.filled]="!!form.get('doctorInfo.doctorStreet')?.value">
           <span matPrefix class="prefix-spacer"></span>
           <input matInput formControlName="doctorStreet" placeholder="Doktorstrasse" />
           <mat-error *ngIf="form.get('doctorInfo.doctorStreet')?.touched && form.get('doctorInfo.doctorStreet')?.hasError('required')">
@@ -966,7 +965,7 @@ Diese Aufzählung ist nicht abschliessend.
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field appearance="outline" class="number-col">
+        <mat-form-field appearance="outline" class="number-col" [class.filled]="!!form.get('doctorInfo.doctorStreetNo')?.value">
           <span matPrefix class="prefix-spacer"></span>
           <input matInput formControlName="doctorStreetNo" placeholder="Nr." />
           <mat-error *ngIf="form.get('doctorInfo.doctorStreetNo')?.touched && form.get('doctorInfo.doctorStreetNo')?.hasError('required')">
@@ -977,7 +976,7 @@ Diese Aufzählung ist nicht abschliessend.
     </div>
 
     <div class="field-row">
-      <mat-form-field appearance="outline" class="full-row">
+      <mat-form-field appearance="outline" class="full-row" [class.filled]="!!form.get('doctorInfo.doctorCity')?.value">
         <span matPrefix class="prefix-spacer"></span>
         <input matInput formControlName="doctorCity" placeholder="PLZ" type="text" />
         <mat-error *ngIf="form.get('doctorInfo.doctorCity')?.touched && form.get('doctorInfo.doctorCity')?.hasError('required')">
@@ -994,6 +993,1681 @@ Diese Aufzählung ist nicht abschliessend.
     </button>
   </div>
 </mat-expansion-panel>
+
+<!-- QUESTION 6 -->
+<mat-expansion-panel *ngIf="currentStep >= 6" [expanded]="currentStep === 6">
+  <mat-expansion-panel-header>
+    <mat-panel-title>6. Bericht Hochladen</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="step-content">
+    <p class="subtitle">
+      Lade bitte deine vorhandenen Berichte wie Operationsbericht, Austrittsbericht oder Arztbericht hoch.
+    </p>
+
+<!-- Upload area -->
+<div
+  class="upload-container"
+  [ngClass]="{ 'uploaded': form.get('reportUpload')?.value?.name }"
+  (click)="fileInput.click()"
+>
+  <ng-container *ngIf="form.get('reportUpload')?.value?.name; else placeholder">
+    <mat-icon>cloud_upload</mat-icon>
+    <span>{{ form.get('reportUpload')?.value.name }}</span>
+  </ng-container>
+
+  <ng-template #placeholder>
+    <mat-icon>cloud_upload</mat-icon>
+    <span>Upload</span>
+  </ng-template>
+
+  <input
+    #fileInput
+    type="file"
+    (change)="onFileSelected($event)"
+    accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+    hidden
+  />
+</div>
+
+    <mat-error class="toggle-error" *ngIf="form.get('reportUpload')?.touched && form.get('reportUpload')?.hasError('required')">
+      Erforderlich
+    </mat-error>
+  </div>
+
+<div class="panel-actions left-align">
+  <button class="dental-button" mat-flat-button (click)="goTo(7)">
+    Dental Fragen
+  </button>
+</div>
+
+</mat-expansion-panel>
+
+
+<!-- QUESTIOONNN 7 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 7" [expanded]="currentStep === 7">
+  <mat-expansion-panel-header>
+    <mat-panel-title>7. Zustand des Zahnbetts:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="gumCondition"
+    class="med-toggle-group"
+    [class.selected]="form.get('gumCondition')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+    <mat-button-toggle value="gut">Gut</mat-button-toggle>
+    <mat-button-toggle value="mangelhaft">Mangelhaft</mat-button-toggle>
+    <mat-button-toggle value="schlecht">Schlecht</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('gumCondition')!.hasError('required') && form.get('gumCondition')!.touched && currentStep === 7"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('gumCondition')?.value === 'mangelhaft' || form.get('gumCondition')?.value === 'schlecht'">
+    <p class="subtitle">Falls mangelhaft oder schlecht, bitte Stelle präzisieren:</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('gumLocation')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="gumLocation"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('gumLocation')!.touched &&
+          form.get('gumLocation')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(8)">
+        Weiter
+      </button>
+    </div>
+</mat-expansion-panel>
+
+
+<!--QUESTIOOOONNN 8-->
+<mat-expansion-panel *ngIf="currentStep >= 8" [expanded]="currentStep === 8">
+  <mat-expansion-panel-header>
+    <mat-panel-title>8. Hygiene:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="hygiene"
+    class="med-toggle-group"
+    [class.selected]="form.get('hygiene')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+    <mat-button-toggle value="gut">Gut</mat-button-toggle>
+    <mat-button-toggle value="mangelhaft">Mangelhaft</mat-button-toggle>
+    <mat-button-toggle value="schlecht">Schlecht</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('hygiene')!.hasError('required') && form.get('hygiene')!.touched && currentStep === 8"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(9)">
+        Weiter
+      </button>
+    </div>
+</mat-expansion-panel>
+
+
+<!--QUESTIOOOONNN 9-->
+<mat-expansion-panel *ngIf="currentStep >= 9" [expanded]="currentStep === 9">
+  <mat-expansion-panel-header>
+    <mat-panel-title>9. Okklusion:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="occlusion"
+    class="med-toggle-group"
+    [class.selected]="form.get('occlusion')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="klasse1">Klasse I</mat-button-toggle>
+  <mat-button-toggle value="klasse2">Klasse II</mat-button-toggle>
+  <mat-button-toggle value="klasse3">Klasse III</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('occlusion')!.hasError('required') && form.get('occlusion')!.touched && currentStep === 9"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(10)">
+        Weiter
+      </button>
+    </div>
+</mat-expansion-panel>
+
+
+<!-- QUESTIOONNN 10 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 10" [expanded]="currentStep === 10">
+  <mat-expansion-panel-header>
+    <mat-panel-title>10. Zustand der Kronen:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="crownCondition"
+    class="med-toggle-group"
+    [class.selected]="form.get('crownCondition')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+    <mat-button-toggle value="keine">Keine</mat-button-toggle>
+    <mat-button-toggle value="gut">Gut</mat-button-toggle>
+    <mat-button-toggle value="mangelhaft">Mangelhaft</mat-button-toggle>
+    <mat-button-toggle value="schlecht">Schlecht</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('crownCondition')!.hasError('required') && form.get('crownCondition')!.touched && currentStep === 10"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('crownCondition')?.value === 'mangelhaft' || form.get('crownCondition')?.value === 'schlecht'">
+    <p class="subtitle">Art und Stelle:</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('crownLocation')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="crownLocation"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('crownLocation')!.touched &&
+          form.get('crownLocation')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(11)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+  <!-- QUESTIOONNN 11 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 11" [expanded]="currentStep === 11">
+  <mat-expansion-panel-header>
+    <mat-panel-title>11. Zustand der Brücken:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="bridgeCondition"
+    class="med-toggle-group"
+    [class.selected]="form.get('bridgeCondition')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+    <mat-button-toggle value="keine">Keine</mat-button-toggle>
+    <mat-button-toggle value="gut">Gut</mat-button-toggle>
+    <mat-button-toggle value="mangelhaft">Mangelhaft</mat-button-toggle>
+    <mat-button-toggle value="schlecht">Schlecht</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('bridgeCondition')!.hasError('required') && form.get('bridgeCondition')!.touched && currentStep === 11"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('bridgeCondition')?.value === 'mangelhaft' || form.get('bridgeCondition')?.value === 'schlecht'">
+    <p class="subtitle">Art und Stelle:</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('bridgeLocation')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="bridgeLocation"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('bridgeLocation')!.touched &&
+          form.get('bridgeLocation')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(12)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+
+   <!-- QUESTIOONNN 12 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 12" [expanded]="currentStep === 12">
+  <mat-expansion-panel-header>
+    <mat-panel-title>12. Zustand der Teilprothesen:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="denturesCondition"
+    class="med-toggle-group"
+    [class.selected]="form.get('denturesCondition')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+    <mat-button-toggle value="keine">Keine</mat-button-toggle>
+    <mat-button-toggle value="gut">Gut</mat-button-toggle>
+    <mat-button-toggle value="mangelhaft">Mangelhaft</mat-button-toggle>
+    <mat-button-toggle value="schlecht">Schlecht</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('denturesCondition')!.hasError('required') && form.get('denturesCondition')!.touched && currentStep === 12"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('denturesCondition')?.value === 'mangelhaft' || form.get('denturesCondition')?.value === 'schlecht'">
+    <p class="subtitle">Art und Stelle:</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('denturesLocation')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="denturesLocation"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('denturesLocation')!.touched &&
+          form.get('denturesLocation')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(13)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+     <!-- QUESTIOONNN 13 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 13" [expanded]="currentStep === 13">
+  <mat-expansion-panel-header>
+    <mat-panel-title>13. Dentition: Hat der Versicherte eine Fehl- oder Missbildung oder einen Stellungsfehler der Zahne?</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="dentalAnomaly"
+    class="med-toggle-group"
+    [class.selected]="form.get('dentalAnomaly')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('dentalAnomaly')!.hasError('required') && form.get('dentalAnomaly')!.touched && currentStep === 13"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('dentalAnomaly')?.value === 'yes'">
+    <p class="subtitle">Wenn ja, welche?</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('dentalAnomalyDeetz')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="dentalAnomalyDeetz"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('dentalAnomalyDeetz')!.touched &&
+          form.get('dentalAnomalyDeetz')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(14)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+
+    <!-- QUESTIOONNN 14 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 14" [expanded]="currentStep === 14">
+  <mat-expansion-panel-header>
+    <mat-panel-title>14. Kiefer: Hat der Versicherte eine Fehl-oder Missbildung oder einen Stellungsfehler des Kiefers?</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="jawDeformity"
+    class="med-toggle-group"
+    [class.selected]="form.get('jawDeformity')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('jawDeformity')!.hasError('required') && form.get('jawDeformity')!.touched && currentStep === 14"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('jawDeformity')?.value === 'yes'">
+    <p class="subtitle">Wenn ja, welche?</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('jawDeformityDeetz')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="jawDeformityDeetz"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('jawDeformityDeetz')!.touched &&
+          form.get('jawDeformityDeetz')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(15)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+     <!-- QUESTIOONNN 15 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 15" [expanded]="currentStep === 15">
+  <mat-expansion-panel-header>
+    <mat-panel-title>15. Leidet der Versicherte an einer Krankheit, die den Zustand der Zahne in Zukunft beeinflussen konnte?</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="toothIllness"
+    class="med-toggle-group"
+    [class.selected]="form.get('toothIllness')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('toothIllness')!.hasError('required') && form.get('toothIllness')!.touched && currentStep === 15"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('toothIllness')?.value === 'yes'">
+    <p class="subtitle">Wenn ja, welche?</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('toothIllnessDeetz')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="toothIllnessDeetz"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('toothIllnessDeetz')!.touched &&
+          form.get('toothIllnessDeetz')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(16)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+     <!-- QUESTIOONNN 16 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 16" [expanded]="currentStep === 16">
+  <mat-expansion-panel-header>
+    <mat-panel-title>16. Fehlende, nicht ersetzte Zähne:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="missingTeeth"
+    class="med-toggle-group"
+    [class.selected]="form.get('missingTeeth')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('missingTeeth')!.hasError('required') && form.get('missingTeeth')!.touched && currentStep === 16"
+  >
+    Bitte auswählen: Nein oder Ja
+  </mat-error>
+
+<!-- TOOTH CHART -->
+<div class="tooth-chart" *ngIf="form.get('missingTeeth')?.value === 'yes'">
+  <!-- First Row (55–51) -->
+
+  <!-- Tooth numbers -->
+  <div class="tooth-number-row">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-number-label"
+      [ngClass]="{ 'selected': isToothSelected(tooth) }"
+    >
+      {{ tooth }}
+    </div>
+  </div>
+
+  <!-- Tooth boxes -->
+  <div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected() }"
+>
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-box"
+      [ngClass]="{ 'selected': isToothSelected(tooth) }"
+      (click)="toggleTooth(tooth)"
+    >
+      <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+    </div>
+  </div>
+
+  <!-- Error below the row -->
+        <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- Second Row (85–81) -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected() }"
+>
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]"
+       class="tooth-box"
+       [class.selected]="isToothSelected(tooth)"
+       (click)="toggleTooth(tooth)">
+    <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- 3A. THIRD ROW -->
+<div class="tooth-row-wrapper">
+  <!-- Number row -->
+  <div class="number-row">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [21, 22, 23, 24, 25, 26, 27, 28]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+  <!-- One global divider -->
+  <div
+  class="vertical-divider top-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected() }"
+></div>
+
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected() }">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected(tooth) }"
+        (click)="toggleTooth(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+
+<!-- 4A. FOURTH ROW -->
+<div class="tooth-row-wrapper">
+  
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected() }">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected(tooth) }"
+        (click)="toggleTooth(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="vertical-divider bottom-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected() }"></div>
+
+    <!-- Number row -->
+  <div class="second-number-row">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [31, 32, 33, 34, 35, 36, 37, 38]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+<!-- 5A. FIFTH ROW -->
+<div class="tooth-number-row" [ngClass]="{ 'highlighted': isAnyToothSelected() }">
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-number-label"
+    [ngClass]="{ 'selected': isToothSelected(tooth) }"
+  >
+    {{ tooth }}
+  </div>
+</div>
+
+<!-- 1B. Tooth boxes -->
+<div
+  class="tooth-box-group"
+  [ngClass]="{ 'highlighted': isAnyToothSelected() }"
+>
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-box"
+    [ngClass]="{ 'selected': isToothSelected(tooth) }"
+    (click)="toggleTooth(tooth)"
+  >
+    <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+
+<!-- SIXTH ROOOWWW  -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected() }">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]"
+       class="tooth-box"
+       [class.selected]="isToothSelected(tooth)"
+       (click)="toggleTooth(tooth)">
+    <mat-icon *ngIf="isToothSelected(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList')!.touched &&
+          form.get('missingTeethList')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+</div>
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(17)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+  
+     <!-- QUESTIOONNN 17 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 17" [expanded]="currentStep === 17">
+  <mat-expansion-panel-header>
+    <mat-panel-title>17. Schadhafte Zahnfullungen:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="missingTeeth2"
+    class="med-toggle-group"
+    [class.selected]="form.get('missingTeeth2')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('missingTeeth2')!.hasError('required') && form.get('missingTeeth2')!.touched && currentStep === 17"
+  >
+    Bitte auswählen: Nein oder Ja
+  </mat-error>
+
+<!-- TOOTH CHART -->
+<div class="tooth-chart" *ngIf="form.get('missingTeeth2')?.value === 'yes'">
+  <!-- First Row (55–51) -->
+
+  <!-- Tooth numbers -->
+  <div class="tooth-number-row">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-number-label"
+      [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+    >
+      {{ tooth }}
+    </div>
+  </div>
+
+  <!-- Tooth boxes -->
+  <div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected2()}">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-box"
+      [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+      (click)="toggleTooth2(tooth)"
+    >
+      <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+    </div>
+  </div>
+
+  <!-- Error below the row -->
+        <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- Second Row (85–81) -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected2() }">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]"
+       class="tooth-box"
+       [class.selected]="isToothSelected2(tooth)"
+       (click)="toggleTooth2(tooth)">
+    <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected2(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- 3A. THIRD ROW -->
+<div class="tooth-row-wrapper">
+  <!-- Number row -->
+  <div class="number-row">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected2(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [21, 22, 23, 24, 25, 26, 27, 28]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected2(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+  <!-- One global divider -->
+  <div
+  class="vertical-divider top-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected2() }"
+></div>
+
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected2() }">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+        (click)="toggleTooth2(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+
+<!-- 4A. FOURTH ROW -->
+<div class="tooth-row-wrapper">
+  
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected2() }">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+        (click)="toggleTooth2(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="vertical-divider bottom-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected2() }"></div>
+
+    <!-- Number row -->
+  <div class="second-number-row">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected2(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [31, 32, 33, 34, 35, 36, 37, 38]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected2(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+<!-- 5A. FIFTH ROW -->
+<div class="tooth-number-row" [ngClass]="{ 'highlighted': isAnyToothSelected2() }">
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-number-label"
+    [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+  >
+    {{ tooth }}
+  </div>
+</div>
+
+<!-- 1B. Tooth boxes -->
+<div
+  class="tooth-box-group"
+  [ngClass]="{ 'highlighted': isAnyToothSelected2() }"
+>
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-box"
+    [ngClass]="{ 'selected': isToothSelected2(tooth) }"
+    (click)="toggleTooth2(tooth)"
+  >
+    <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+
+<!-- SIXTH ROOOWWW  -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected2() }">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]"
+       class="tooth-box"
+       [class.selected]="isToothSelected2(tooth)"
+       (click)="toggleTooth2(tooth)">
+    <mat-icon *ngIf="isToothSelected2(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected2(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList2')!.touched &&
+          form.get('missingTeethList2')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+</div>
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(18)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+       <!-- QUESTIOONNN 18 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 18" [expanded]="currentStep === 18">
+  <mat-expansion-panel-header>
+    <mat-panel-title>18. Karlose Zahne:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="missingTeeth3"
+    class="med-toggle-group"
+    [class.selected]="form.get('missingTeeth3')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('missingTeeth3')!.hasError('required') && form.get('missingTeeth3')!.touched && currentStep === 18"
+  >
+    Bitte auswählen: Nein oder Ja
+  </mat-error>
+
+<!-- TOOTH CHART -->
+<div class="tooth-chart" *ngIf="form.get('missingTeeth3')?.value === 'yes'">
+  <!-- First Row (55–51) -->
+
+  <!-- Tooth numbers -->
+  <div class="tooth-number-row">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-number-label"
+      [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+    >
+      {{ tooth }}
+    </div>
+  </div>
+
+  <!-- Tooth boxes -->
+  <div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-box"
+      [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+      (click)="toggleTooth3(tooth)"
+    >
+      <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+    </div>
+  </div>
+
+  <!-- Error below the row -->
+        <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- Second Row (85–81) -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]"
+       class="tooth-box"
+       [class.selected]="isToothSelected3(tooth)"
+       (click)="toggleTooth3(tooth)">
+    <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected3(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- 3A. THIRD ROW -->
+<div class="tooth-row-wrapper">
+  <!-- Number row -->
+  <div class="number-row">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected3(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [21, 22, 23, 24, 25, 26, 27, 28]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected3(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+  <!-- One global divider -->
+  <div
+  class="vertical-divider top-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected3() }"
+></div>
+
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+        (click)="toggleTooth3(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+
+<!-- 4A. FOURTH ROW -->
+<div class="tooth-row-wrapper">
+  
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+        (click)="toggleTooth3(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="vertical-divider bottom-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected3() }"></div>
+
+    <!-- Number row -->
+  <div class="second-number-row">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected3(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [31, 32, 33, 34, 35, 36, 37, 38]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected3(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+<!-- 5A. FIFTH ROW -->
+<div class="tooth-number-row" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-number-label"
+    [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+  >
+    {{ tooth }}
+  </div>
+</div>
+
+<!-- 1B. Tooth boxes -->
+<div
+  class="tooth-box-group"
+  [ngClass]="{ 'highlighted': isAnyToothSelected3() }"
+>
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-box"
+    [ngClass]="{ 'selected': isToothSelected3(tooth) }"
+    (click)="toggleTooth3(tooth)"
+  >
+    <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+
+<!-- SIXTH ROOOWWW  -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected3() }">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]"
+       class="tooth-box"
+       [class.selected]="isToothSelected3(tooth)"
+       (click)="toggleTooth3(tooth)">
+    <mat-icon *ngIf="isToothSelected3(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected3(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList3')!.touched &&
+          form.get('missingTeethList3')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+</div>
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(19)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+         <!-- QUESTIOONNN 19 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 19" [expanded]="currentStep === 19">
+  <mat-expansion-panel-header>
+    <mat-panel-title>19. Wurzelbehandelte Zahne:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="missingTeeth4"
+    class="med-toggle-group"
+    [class.selected]="form.get('missingTeeth4')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('missingTeeth4')!.hasError('required') && form.get('missingTeeth4')!.touched && currentStep === 19"
+  >
+    Bitte auswählen: Nein oder Ja
+  </mat-error>
+
+<!-- TOOTH CHART -->
+<div class="tooth-chart" *ngIf="form.get('missingTeeth4')?.value === 'yes'">
+  <!-- First Row (55–51) -->
+
+  <!-- Tooth numbers -->
+  <div class="tooth-number-row">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-number-label"
+      [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+    >
+      {{ tooth }}
+    </div>
+  </div>
+
+  <!-- Tooth boxes -->
+  <div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+    <div
+      *ngFor="let tooth of [55, 54, 53, 52, 51]"
+      class="tooth-box"
+      [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+      (click)="toggleTooth4(tooth)"
+    >
+      <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+    </div>
+  </div>
+
+  <!-- Error below the row -->
+        <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- Second Row (85–81) -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]"
+       class="tooth-box"
+       [class.selected]="isToothSelected4(tooth)"
+       (click)="toggleTooth4(tooth)">
+    <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [85, 84, 83, 82, 81]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected4(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+<!-- 3A. THIRD ROW -->
+<div class="tooth-row-wrapper">
+  <!-- Number row -->
+  <div class="number-row">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected4(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [21, 22, 23, 24, 25, 26, 27, 28]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected4(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+  <!-- One global divider -->
+  <div
+  class="vertical-divider top-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected4() }"
+></div>
+
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+    <ng-container *ngFor="let tooth of [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+        (click)="toggleTooth4(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+
+<!-- 4A. FOURTH ROW -->
+<div class="tooth-row-wrapper">
+  
+  <!-- Tooth box row -->
+  <div class="second-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38]">
+      <div
+        class="second-box"
+        [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+        (click)="toggleTooth4(tooth)"
+      >
+        <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="vertical-divider bottom-divider"
+  [ngClass]="{ 'highlighted-divider': isAnyToothSelected4() }"></div>
+
+    <!-- Number row -->
+  <div class="second-number-row">
+    <ng-container *ngFor="let tooth of [48, 47, 46, 45, 44, 43, 42, 41]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected4(tooth) }">{{ tooth }}</div>
+    </ng-container>
+    <div class="vertical-divider"></div>
+    <ng-container *ngFor="let tooth of [31, 32, 33, 34, 35, 36, 37, 38]">
+      <div class="number-label" [ngClass]="{ 'selected': isToothSelected4(tooth) }">{{ tooth }}</div>
+    </ng-container>
+  </div>
+
+          <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+<!-- 5A. FIFTH ROW -->
+<div class="tooth-number-row" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-number-label"
+    [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+  >
+    {{ tooth }}
+  </div>
+</div>
+
+<!-- 1B. Tooth boxes -->
+<div
+  class="tooth-box-group"
+  [ngClass]="{ 'highlighted': isAnyToothSelected4() }"
+>
+  <div
+    *ngFor="let tooth of [61, 62, 63, 64, 65]"
+    class="tooth-box"
+    [ngClass]="{ 'selected': isToothSelected4(tooth) }"
+    (click)="toggleTooth4(tooth)"
+  >
+    <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+
+
+<!-- SIXTH ROOOWWW  -->
+
+<div class="tooth-box-group" [ngClass]="{ 'highlighted': isAnyToothSelected4() }">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]"
+       class="tooth-box"
+       [class.selected]="isToothSelected4(tooth)"
+       (click)="toggleTooth4(tooth)">
+    <mat-icon *ngIf="isToothSelected4(tooth)">check</mat-icon>
+  </div>
+</div>
+
+<div class="second-tooth-number-row">
+  <div *ngFor="let tooth of [71, 72, 73, 74, 75]" 
+  class="tooth-number-label"
+  [ngClass]="{ 'selected': isToothSelected4(tooth) }">
+    {{ tooth }}
+  </div>
+</div>
+
+        <mat-error *ngIf="
+          form.get('missingTeethList4')!.touched &&
+          form.get('missingTeethList4')!.hasError('required')
+        ">
+          Bitte einen Zahn auswählen.
+        </mat-error>
+</div>
+
+</div>
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(20)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+       <!-- QUESTIOONNN 20 -->
+
+<mat-expansion-panel *ngIf="currentStep >= 20" [expanded]="currentStep === 20">
+  <mat-expansion-panel-header>
+    <mat-panel-title>20. Ist eine Behandlung bei einem Zahnarzt/ Kieferorthopaden im Gang oder geplant?</mat-panel-title>
+  </mat-expansion-panel-header>
+
+ <div class="step-content">
+
+  <mat-button-toggle-group
+    formControlName="dentistTreatment"
+    class="med-toggle-group"
+    [class.selected]="form.get('dentistTreatment')?.value !== null"
+    aria-label="Zahnfleischzustand"
+  >
+  <mat-button-toggle value="no">Nein</mat-button-toggle>
+  <mat-button-toggle value="yes">Ja</mat-button-toggle>
+
+  </mat-button-toggle-group>
+
+  <mat-error
+    class="toggle-error"
+    *ngIf="form.get('dentistTreatment')!.hasError('required') && form.get('dentistTreatment')!.touched && currentStep === 20"
+  >
+    Bitte auswählen: Gut, Mangelhaft oder Schlecht
+  </mat-error>
+
+  <!-- CONDITIONAL TEXT INPUT -->
+  <div *ngIf="form.get('dentistTreatment')?.value === 'yes'">
+    <p class="subtitle">Wenn ja, welche?</p>
+
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('dentistTreatmentDetails')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="dentistTreatmentDetails"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('dentistTreatmentDetails')!.touched &&
+          form.get('dentistTreatmentDetails')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(21)">
+        Weiter
+      </button>
+    </div>
+  </mat-expansion-panel>
+
+
+<!-- QUESTION 21 -->
+<mat-expansion-panel *ngIf="currentStep >= 21" [expanded]="currentStep === 21">
+  <mat-expansion-panel-header>
+    <mat-panel-title>21. Datum der letzten Radiographie:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="step-content">
+    <div class="field-row">
+      <div class="date-field">
+      
+        <mat-form-field
+          appearance="outline"
+          [class.filled]="!!form.get('fullDate')?.value"
+          class="full-row"
+        >
+          <span matPrefix class="prefix-spacer"></span>
+          <input
+            matInput
+            [matDatepicker]="startPicker"
+            formControlName="fullDate"
+            placeholder="MM.TT.JJJJ"
+          />
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+
+          <mat-error *ngIf="form.get('fullDate')?.touched && form.get('fullDate')?.hasError('required')">
+            Erforderlich
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="panel-actions">
+      <button class="next-button" mat-flat-button color="#FFAB91" (click)="goTo(22)">
+        Weiter
+      </button>
+    </div>
+  </div>
+</mat-expansion-panel>
+
+
+<!-- QUESTION 22 -->
+<mat-expansion-panel *ngIf="currentStep >= 22" [expanded]="currentStep === 22">
+  <mat-expansion-panel-header>
+    <mat-panel-title>22. Bemerkungen:</mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="step-content">
+    <div class="field-row">
+      <mat-form-field
+        appearance="outline"
+        class="full-row"
+        [class.filled]="!!form.get('treatmentRemarks')?.value"
+      >
+        <span matPrefix class="prefix-spacer"></span>
+        <input
+          matInput
+          formControlName="treatmentRemarks"
+          placeholder="Hier eingeben..."
+          type="text"
+        />
+        <mat-error *ngIf="
+          form.get('treatmentRemarks')!.touched &&
+          form.get('treatmentRemarks')!.hasError('required')
+        ">
+          Erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+</mat-expansion-panel>
+
+
+  <div class="form-actions">
+<button
+  mat-raised-button
+  color="primary"
+  class="done-button"
+  (click)="onSubmit()"
+>
+  Done
+</button>
+
+
+</div>
 
 
     </mat-accordion>
