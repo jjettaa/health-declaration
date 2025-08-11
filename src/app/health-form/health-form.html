@@ -67,7 +67,7 @@
       </mat-expansion-panel>
 
 <!-- QUESTIIOOONN 2 -->
-    <mat-expansion-panel *ngIf="currentStep >= 2" [expanded]="currentStep === 2" id="panel-2">
+    <mat-expansion-panel *ngIf="maxStep  >= 2" [expanded]="currentStep === 2" id="panel-2">
     <mat-expansion-panel-header>
       <mat-panel-title>2. Medikamente oder Hilfsmittel</mat-panel-title>
     </mat-expansion-panel-header>
@@ -359,7 +359,7 @@
   </mat-expansion-panel>
 
   <!-- QUESTIIOOONN 3 -->
-    <mat-expansion-panel *ngIf="currentStep >= 3" [expanded]="currentStep === 3" id="panel-3">
+    <mat-expansion-panel *ngIf="maxStep  >= 3" [expanded]="currentStep === 3" id="panel-3">
     <mat-expansion-panel-header>
       <mat-panel-title>3. Krankheiten oder Beschwerden</mat-panel-title>
     </mat-expansion-panel-header>
@@ -612,7 +612,7 @@ Diese Aufzählung ist nicht abschliessend.
 
   
  <!-- QUESTION 4 -->
-<mat-expansion-panel *ngIf="currentStep >= 4" [expanded]="currentStep === 4" id="panel-4">
+<mat-expansion-panel *ngIf="maxStep  >= 4" [expanded]="currentStep === 4" id="panel-4">
   <mat-expansion-panel-header>
     <mat-panel-title>4. Behandlungen - durchgefuhrte oder geplante Spitalaufenthalte/Operationen</mat-panel-title>
   </mat-expansion-panel-header>
@@ -921,7 +921,7 @@ Diese Aufzählung ist nicht abschliessend.
 </mat-expansion-panel>
 
 <!-- QUESTION 5 -->
-<mat-expansion-panel *ngIf="currentStep >= 5" [expanded]="currentStep === 5">
+<mat-expansion-panel *ngIf="maxStep  >= 5" [expanded]="currentStep === 5">
   <mat-expansion-panel-header>
     <mat-panel-title>5. Arzt</mat-panel-title>
   </mat-expansion-panel-header>
@@ -995,7 +995,7 @@ Diese Aufzählung ist nicht abschliessend.
 </mat-expansion-panel>
 
 <!-- QUESTION 6 -->
-<mat-expansion-panel *ngIf="currentStep >= 6" [expanded]="currentStep === 6">
+<mat-expansion-panel *ngIf="maxStep  >= 6" [expanded]="currentStep === 6">
   <mat-expansion-panel-header>
     <mat-panel-title>6. Bericht Hochladen</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1046,7 +1046,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 <!-- QUESTIOONNN 7 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 7" [expanded]="currentStep === 7">
+<mat-expansion-panel *ngIf="maxStep  >= 7" [expanded]="currentStep === 7">
   <mat-expansion-panel-header>
     <mat-panel-title>7. Zustand des Zahnbetts:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1110,7 +1110,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 
 <!--QUESTIOOOONNN 8-->
-<mat-expansion-panel *ngIf="currentStep >= 8" [expanded]="currentStep === 8">
+<mat-expansion-panel *ngIf="maxStep  >= 8" [expanded]="currentStep === 8">
   <mat-expansion-panel-header>
     <mat-panel-title>8. Hygiene:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1146,7 +1146,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 
 <!--QUESTIOOOONNN 9-->
-<mat-expansion-panel *ngIf="currentStep >= 9" [expanded]="currentStep === 9">
+<mat-expansion-panel *ngIf="maxStep  >= 9" [expanded]="currentStep === 9">
   <mat-expansion-panel-header>
     <mat-panel-title>9. Okklusion:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1183,7 +1183,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 <!-- QUESTIOONNN 10 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 10" [expanded]="currentStep === 10">
+<mat-expansion-panel *ngIf="maxStep  >= 10" [expanded]="currentStep === 10">
   <mat-expansion-panel-header>
     <mat-panel-title>10. Zustand der Kronen:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1248,7 +1248,7 @@ Diese Aufzählung ist nicht abschliessend.
 
   <!-- QUESTIOONNN 11 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 11" [expanded]="currentStep === 11">
+<mat-expansion-panel *ngIf="maxStep  >= 11" [expanded]="currentStep === 11">
   <mat-expansion-panel-header>
     <mat-panel-title>11. Zustand der Brücken:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1314,7 +1314,7 @@ Diese Aufzählung ist nicht abschliessend.
 
    <!-- QUESTIOONNN 12 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 12" [expanded]="currentStep === 12">
+<mat-expansion-panel *ngIf="maxStep  >= 12" [expanded]="currentStep === 12">
   <mat-expansion-panel-header>
     <mat-panel-title>12. Zustand der Teilprothesen:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1379,7 +1379,7 @@ Diese Aufzählung ist nicht abschliessend.
 
      <!-- QUESTIOONNN 13 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 13" [expanded]="currentStep === 13">
+<mat-expansion-panel *ngIf="maxStep  >= 13" [expanded]="currentStep === 13">
   <mat-expansion-panel-header>
     <mat-panel-title>13. Dentition: Hat der Versicherte eine Fehl- oder Missbildung oder einen Stellungsfehler der Zahne?</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1444,7 +1444,7 @@ Diese Aufzählung ist nicht abschliessend.
 
     <!-- QUESTIOONNN 14 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 14" [expanded]="currentStep === 14">
+<mat-expansion-panel *ngIf="maxStep  >= 14" [expanded]="currentStep === 14">
   <mat-expansion-panel-header>
     <mat-panel-title>14. Kiefer: Hat der Versicherte eine Fehl-oder Missbildung oder einen Stellungsfehler des Kiefers?</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1508,7 +1508,7 @@ Diese Aufzählung ist nicht abschliessend.
 
      <!-- QUESTIOONNN 15 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 15" [expanded]="currentStep === 15">
+<mat-expansion-panel *ngIf="maxStep  >= 15" [expanded]="currentStep === 15">
   <mat-expansion-panel-header>
     <mat-panel-title>15. Leidet der Versicherte an einer Krankheit, die den Zustand der Zahne in Zukunft beeinflussen konnte?</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1571,7 +1571,7 @@ Diese Aufzählung ist nicht abschliessend.
 
      <!-- QUESTIOONNN 16 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 16" [expanded]="currentStep === 16">
+<mat-expansion-panel *ngIf="maxStep  >= 16" [expanded]="currentStep === 16">
   <mat-expansion-panel-header>
     <mat-panel-title>16. Fehlende, nicht ersetzte Zähne:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -1810,7 +1810,7 @@ Diese Aufzählung ist nicht abschliessend.
   
      <!-- QUESTIOONNN 17 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 17" [expanded]="currentStep === 17">
+<mat-expansion-panel *ngIf="maxStep  >= 17" [expanded]="currentStep === 17">
   <mat-expansion-panel-header>
     <mat-panel-title>17. Schadhafte Zahnfullungen:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -2047,7 +2047,7 @@ Diese Aufzählung ist nicht abschliessend.
 
        <!-- QUESTIOONNN 18 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 18" [expanded]="currentStep === 18">
+<mat-expansion-panel *ngIf="maxStep  >= 18" [expanded]="currentStep === 18">
   <mat-expansion-panel-header>
     <mat-panel-title>18. Karlose Zahne:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -2283,7 +2283,7 @@ Diese Aufzählung ist nicht abschliessend.
 
          <!-- QUESTIOONNN 19 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 19" [expanded]="currentStep === 19">
+<mat-expansion-panel *ngIf="maxStep  >= 19" [expanded]="currentStep === 19">
   <mat-expansion-panel-header>
     <mat-panel-title>19. Wurzelbehandelte Zahne:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -2520,7 +2520,7 @@ Diese Aufzählung ist nicht abschliessend.
 
        <!-- QUESTIOONNN 20 -->
 
-<mat-expansion-panel *ngIf="currentStep >= 20" [expanded]="currentStep === 20">
+<mat-expansion-panel *ngIf="maxStep  >= 20" [expanded]="currentStep === 20">
   <mat-expansion-panel-header>
     <mat-panel-title>20. Ist eine Behandlung bei einem Zahnarzt/ Kieferorthopaden im Gang oder geplant?</mat-panel-title>
   </mat-expansion-panel-header>
@@ -2583,7 +2583,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 
 <!-- QUESTION 21 -->
-<mat-expansion-panel *ngIf="currentStep >= 21" [expanded]="currentStep === 21">
+<mat-expansion-panel *ngIf="maxStep  >= 21" [expanded]="currentStep === 21">
   <mat-expansion-panel-header>
     <mat-panel-title>21. Datum der letzten Radiographie:</mat-panel-title>
   </mat-expansion-panel-header>
@@ -2624,7 +2624,7 @@ Diese Aufzählung ist nicht abschliessend.
 
 
 <!-- QUESTION 22 -->
-<mat-expansion-panel *ngIf="currentStep >= 22" [expanded]="currentStep === 22">
+<mat-expansion-panel *ngIf="maxStep >= 22" [expanded]="currentStep === 22">
   <mat-expansion-panel-header>
     <mat-panel-title>22. Bemerkungen:</mat-panel-title>
   </mat-expansion-panel-header>

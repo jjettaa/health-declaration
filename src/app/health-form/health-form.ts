@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormArray, FormControl} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl} from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,12 +36,14 @@ export class HealthForm implements OnInit {
   form!: FormGroup;
   
   currentStep = 1;
+  maxStep = 1; // NEW: highest step the user has reached so far
+
   
     private stepControls: Record<number, string[]> = {
     1: ['height', 'weight'],
     2: ['medication', 'medicationName', 'medicationReason', 'conditions'],
     3: ['hadIllness', 'illnesses'],
-    4: ['treatments', 'treatmentDetails'],
+    4: ['treatments', 'treatmentDetails', 'treatmentPsychologist', 'treatmentAlternative'],
     5: [
     'doctorInfo.doctorName',
     'doctorInfo.doctorLastName',
@@ -81,8 +83,8 @@ export class HealthForm implements OnInit {
       // Q2
       medication: [null, Validators.required],     
       medicationDetails: [''],
-      medicationName: ['', Validators.required],
-      medicationReason: ['', Validators.required],  
+      medicationName: [''],
+      medicationReason: [''],  
       conditions: this.fb.array([]),
 
       // Q3 
@@ -94,8 +96,8 @@ export class HealthForm implements OnInit {
       treatmentDetails: this.fb.array([]) ,      // FormArray if “ja”
       hospitalTreatment: [null],
       doctorTreatment: [null],
-      treatmentPsychologist: [null, Validators.required],
-      treatmentAlternative: [null, Validators.required],
+      treatmentPsychologist: [null],
+      treatmentAlternative: [null],
 
       //Q5
       doctorInfo: this.fb.group({
@@ -184,6 +186,141 @@ if (this.illnessesArray.length === 0) {
 if (this.treatmentDetailsArray.length === 0) {
   this.addTreatment();
 }
+// ---- Q2: medication -> medicationName, medicationReason, conditions[]
+const med = this.form.get('medication') as FormControl;
+const applyMed = (v: any) => {
+  const yes = v === 'yes';
+
+  this.setConditionalValidator('medicationName',   yes);
+  this.setConditionalValidator('medicationReason', yes);
+  this.setConditionalValidator('conditions',       yes);
+
+  // OPTIONAL: if you want the first row to appear only when YES and it's empty:
+  // if (yes && this.conditionsArray.length === 0) this.addCondition();
+
+  // NEW: reset UI state so errors don't show immediately after toggle
+  this.resetVisualState(this.form.get('medicationName')!);
+  this.resetVisualState(this.form.get('medicationReason')!);
+  this.resetVisualState(this.conditionsArray);
+};
+applyMed(med.value);
+med.valueChanges.subscribe(applyMed);
+
+// ---- Q3: hadIllness -> illnesses[]
+const hadIll = this.form.get('hadIllness') as FormControl;
+const applyIll = (v: any) => {
+  const yes = v === 'yes';
+  this.setConditionalValidator('illnesses', yes);
+
+  // if (yes && this.illnessesArray.length === 0) this.addIllness();
+
+  // NEW:
+  this.resetVisualState(this.illnessesArray);
+};
+applyIll(hadIll.value);
+hadIll.valueChanges.subscribe(applyIll);
+
+// ---- Q4: treatments -> treatmentDetails[], treatmentPsychologist, treatmentAlternative
+const tr = this.form.get('treatments') as FormControl;
+const applyTr = (v: any) => {
+  const yes = v === 'yes';
+  this.setConditionalValidator('treatmentDetails',     yes);
+  this.setConditionalValidator('treatmentPsychologist', yes);
+  this.setConditionalValidator('treatmentAlternative',  yes);
+
+  // if (yes && this.treatmentDetailsArray.length === 0) this.addTreatment();
+
+  // NEW:
+  this.resetVisualState(this.treatmentDetailsArray);
+  this.resetVisualState(this.form.get('treatmentPsychologist')!);
+  this.resetVisualState(this.form.get('treatmentAlternative')!);
+};
+applyTr(tr.value);
+tr.valueChanges.subscribe(applyTr);
+
+// ---- Q16–19: missing teeth lists required only on "yes"
+([
+  ['missingTeeth',  'missingTeethList'],
+  ['missingTeeth2', 'missingTeethList2'],
+  ['missingTeeth3', 'missingTeethList3'],
+  ['missingTeeth4', 'missingTeethList4'],
+] as const).forEach(([togglePath, listPath]) => {
+  const t = this.form.get(togglePath) as FormControl;
+  const apply = () => {
+    const yes = t.value === 'yes';
+    this.setConditionalValidator(listPath, yes);
+    // NEW:
+    this.resetVisualState(this.form.get(listPath)!);
+  };
+  apply();
+  t.valueChanges.subscribe(apply);
+});
+
+// helper to check "poor"
+const poor = (x: string | null) =>
+  (x ?? '').toLowerCase() === 'mangelhaft' ||
+  (x ?? '').toLowerCase() === 'schlecht';
+
+// Q7 — gum
+const gum = this.form.get('gumCondition') as FormControl;
+const applyGum = () => {
+  const req = poor(gum.value);
+  this.setOptionalRequired('gumLocation', req);
+  if (req) this.resetVisualState(this.form.get('gumLocation')!);
+};
+applyGum();
+gum.valueChanges.subscribe(applyGum);
+
+// Q10 — crown
+const crown = this.form.get('crownCondition') as FormControl;
+const applyCrown = () => {
+  const req = poor(crown.value);
+  this.setOptionalRequired('crownLocation', req);
+  if (req) this.resetVisualState(this.form.get('crownLocation')!);
+};
+applyCrown();
+crown.valueChanges.subscribe(applyCrown);
+
+// Q11 — bridge
+const bridge = this.form.get('bridgeCondition') as FormControl;
+const applyBridge = () => {
+  const req = poor(bridge.value);
+  this.setOptionalRequired('bridgeLocation', req);
+  if (req) this.resetVisualState(this.form.get('bridgeLocation')!);
+};
+applyBridge();
+bridge.valueChanges.subscribe(applyBridge);
+
+// Q12 — dentures
+const dentures = this.form.get('denturesCondition') as FormControl;
+const applyDentures = () => {
+  const req = poor(dentures.value);
+  this.setOptionalRequired('denturesLocation', req);
+  if (req) this.resetVisualState(this.form.get('denturesLocation')!);
+};
+applyDentures();
+dentures.valueChanges.subscribe(applyDentures);
+
+// Q13–Q15 + Q20: toggle -> details (required only when YES; never disabled)
+([
+  ['dentalAnomaly',    'dentalAnomalyDeetz'],
+  ['jawDeformity',     'jawDeformityDeetz'],
+  ['toothIllness',     'toothIllnessDeetz'],
+  ['dentistTreatment', 'dentistTreatmentDetails'],
+] as const).forEach(([togglePath, detailsPath]) => {
+  const t = this.form.get(togglePath) as FormControl;
+  const apply = () => {
+    const yes = t.value === 'yes';
+    // make it required or not, but keep it enabled so the user can type
+    this.setOptionalRequired(detailsPath, yes);
+
+    // prevent the red error from showing immediately when switching NO -> YES
+    if (yes) this.resetVisualState(this.form.get(detailsPath)!);
+  };
+  apply();
+  t.valueChanges.subscribe(apply);
+});
+
 
   }
 
@@ -379,10 +516,7 @@ goTo(step: number, markTouched: boolean = true) {
   const missingTeeth4Value = this.form.get('missingTeeth4')?.value;
 
   // Set conditional validators
-  this.setConditionalValidator('gumLocation', gumValue === 'mangelhaft' || gumValue === 'schlecht');
-  this.setConditionalValidator('crownLocation', ['mangelhaft', 'schlecht'].includes(crownValue));
-  this.setConditionalValidator('bridgeLocation', ['mangelhaft', 'schlecht'].includes(bridgeValue));
-  this.setConditionalValidator('denturesLocation', ['mangelhaft', 'schlecht'].includes(denturesValue));
+
   this.setConditionalValidator('dentalAnomalyDeetz', dentalAnomalyValue === 'yes');
   this.setConditionalValidator('jawDeformityDeetz', jawDeformityValue === 'yes');
   this.setConditionalValidator('toothIllnessDeetz', toothIllnessValue === 'yes');
@@ -441,7 +575,7 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
   for (const name of controls) {
     if (medicationValue === 'no' && ['medicationName', 'medicationReason', 'conditions'].includes(name)) continue;
     if (hadIllnessValue === 'no' && ['illnesses'].includes(name)) continue;
-    if (treatmentsValue === 'no' && ['treatmentDetails'].includes(name)) continue;
+    if (treatmentsValue === 'no' && ['treatmentDetails', 'treatmentPsychologist', 'treatmentAlternative'].includes(name)) continue;
     if (gumValue === 'gut' && name === 'gumLocation') continue;
     if (!['mangelhaft', 'schlecht'].includes(crownValue) && name === 'crownLocation') continue;
     if (!['mangelhaft', 'schlecht'].includes(bridgeValue) && name === 'bridgeLocation') continue;
@@ -464,6 +598,8 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
       this.cd.detectChanges();
     }
     this.currentStep = step;
+    if (step > this.maxStep) this.maxStep = step; // NEW
+
   }
 }
 
@@ -473,16 +609,48 @@ private setConditionalValidator(controlName: string, shouldBeRequired: boolean) 
   if (!control) return;
 
   if (shouldBeRequired) {
+    control.enable({ emitEvent: false }); // re-enable when YES
     if (control instanceof FormArray) {
       control.setValidators([Validators.required, Validators.minLength(1)]);
     } else {
       control.setValidators([Validators.required]);
     }
   } else {
+    // KEY: make it inert when NO
     control.clearValidators();
+    control.setErrors(null);
+    control.disable({ emitEvent: false });
   }
 
-  control.updateValueAndValidity();
+  control.updateValueAndValidity({ emitEvent: false });
+}
+
+private resetVisualState(ctrl: AbstractControl) {
+  ctrl.markAsPristine({ onlySelf: true });
+  ctrl.markAsUntouched({ onlySelf: true });
+
+  const any: any = ctrl as any;
+  if (any.controls) {
+    (Array.isArray(any.controls) ? any.controls : Object.values(any.controls))
+      .forEach((c: AbstractControl) => this.resetVisualState(c));
+  }
+}
+
+private setOptionalRequired(path: string, required: boolean) {
+  const c = this.form.get(path);
+  if (!c) return;
+
+  // always enabled so the user can type
+  c.enable({ emitEvent: false });
+
+  if (required) {
+    c.setValidators([Validators.required]);
+  } else {
+    c.clearValidators();
+  }
+  // clear old errors (prevents stale red messages)
+  c.setErrors(null);
+  c.updateValueAndValidity({ emitEvent: false });
 }
 
 private scrollToFirstInvalidControl(): void {
