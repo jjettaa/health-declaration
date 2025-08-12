@@ -405,7 +405,7 @@ background-color: rgba(255, 218, 185, 0.15) !important;
   font-weight: 400;
   border-radius: 7px;
   padding: 0 16px;
-  width: 312px;
+  width: 100%;
 }
 
 
@@ -481,11 +481,9 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 
 .med-toggle-group ::ng-deep .mat-button-toggle:nth-child(3) .mat-button-toggle-button {
   border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
 }
 
-.med-toggle-group ::ng-deep .mat-button-toggle:nth-child(4) .mat-button-toggle-label-content {
-  border-left: 1px solid #ccc !important;
-}
 
 .tooth-number-row {
   display: flex;
@@ -712,7 +710,7 @@ mat-error {
   height: 35px;
   border-radius: 8px;
   color: white;
-  background-color: #FB8C00 !important; 
+  background-color: #FF6E00 !important; 
   font-size: 14px;
 }
 

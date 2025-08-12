@@ -11,6 +11,12 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule }      from '@angular/material/datepicker';
 import { MatNativeDateModule }      from '@angular/material/core';
 import { ChangeDetectorRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { Observable, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap, map, catchError } from 'rxjs/operators';
+
+type ZipOption = { code: string; place: string; state?: string };
 
 
 @Component({
@@ -26,11 +32,14 @@ import { ChangeDetectorRef } from '@angular/core';
     MatIconModule,
     MatButtonToggleModule,
     MatDatepickerModule,   
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatAutocompleteModule,
+
   ],
   templateUrl: './health-form.html',
   styleUrls: ['./health-form.scss']
 })
+
 export class HealthForm implements OnInit {
   
   form!: FormGroup;
@@ -73,6 +82,7 @@ export class HealthForm implements OnInit {
 
   constructor(private fb: FormBuilder,
               private cd: ChangeDetectorRef,
+              private http: HttpClient,
   ) {}
 
   ngOnInit() {
@@ -320,10 +330,41 @@ dentures.valueChanges.subscribe(applyDentures);
   apply();
   t.valueChanges.subscribe(apply);
 });
-
-
   }
 
+  // suggestions stream per FormArray row
+plzOptions$: Observable<ZipOption[]>[] = [];
+
+// for displayWith
+plzDisplay = (v: any): string => {
+  if (!v) return '';
+  if (typeof v === 'string') return v;         // after selection, if it's a string, show it
+  const state = v.state ? ` (${v.state})` : '';
+  return `${v.code} — ${v.place}${state}`;     // full label for objects
+};
+
+// builder for the autocomplete stream
+private buildZippopotamStream(ctrl: FormControl, country: 'CH'|'DE'|'AT' = 'CH'): Observable<ZipOption[]> {
+  const minLen = country === 'DE' ? 5 : 4;
+  return ctrl.valueChanges.pipe(
+    filter(v => typeof v === 'string'),
+    debounceTime(200),
+    distinctUntilChanged(),
+    switchMap(raw => {
+      const term = (raw as string).trim();
+      if (term.length < minLen) return of([]);
+      const url = `https://api.zippopotam.us/${country}/${encodeURIComponent(term)}`;
+      return this.http.get<any>(url).pipe(
+        map(res => (res?.places ?? []).map((p: any) => ({
+          code: res['post code'] ?? term,
+          place: p['place name'],
+          state: p['state'],
+        })) as ZipOption[]),
+        catchError(() => of([]))
+      );
+    }),
+  );
+}
 
   get conditionsArray(): FormArray {
     return this.form.get('conditions') as FormArray;
@@ -343,6 +384,9 @@ dentures.valueChanges.subscribe(applyDentures);
     });
     this.conditionsArray.push(group);
 
+  const idx = this.conditionsArray.length - 1;
+  const plzCtrl = group.get('doctorCity') as FormControl;
+  this.plzOptions$[idx] = this.buildZippopotamStream(plzCtrl, 'CH'); 
   }
     removeCondition(index: number) {
     this.conditionsArray.removeAt(index);
@@ -494,9 +538,18 @@ isAnyToothSelected4(): boolean {
   return this.missingTeethList4.length > 0;
 }
 
+get totalSteps(): number {
+  return Object.keys(this.stepControls).length;
+}
 
-goTo(step: number, markTouched: boolean = true) {
-  const controls = this.stepControls[this.currentStep] || [];
+nextFrom(step: number) {
+  // validate current step and jump to the next
+  this.goTo(step + 1, true, step);
+}
+
+goTo(step: number, markTouched: boolean = true, fromStep?: number) {
+  const validateStep = fromStep ?? this.currentStep;     // ← NEW
+  const controls = this.stepControls[validateStep] || []; // ← CHANGED (was this.currentStep)
   let stepInvalid = false;
 
   const medicationValue = this.form.get('medication')?.value;
