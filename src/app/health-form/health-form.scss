@@ -2,6 +2,8 @@
   padding: 5px 5px; 
   display: flex;
   justify-content: center; 
+  min-height: 100vh;
+  padding-bottom: 84px;
 }
 
 .health-form-card {
@@ -13,30 +15,38 @@
 }
 
 .health-form-header {
+  position: sticky;  /* make it stick when scrolling */
+  top: 0;            /* stick to top of container */
+  z-index: 100;      /* stay above the accordion content */
+
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 56px;            
   padding-top: 20px;
-  padding-bottom:15px ;
+  padding-bottom: 15px;
+  background: #fff;  /* ensure content behind it doesn't show through */
 
   h2 {
     margin: 0;
     font-size: 20px;
     line-height: 24px;
-    font-weight:400;
+    font-weight: 400;
   }
+
   .menu-button {
     width: 40px;
     height: 40px;
     padding: 8px;
     border-radius: 50%;
+
     mat-icon {
       font-size: 24px;
       line-height: 24px;
     }
   }
 }
+
 
 .health-form-accordion {
 
@@ -705,6 +715,18 @@ mat-error {
   display: block;
 }
 
+.form-actions {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  width: calc(100% - 32px);   /* side gutters on small screens */
+  max-width: 720px;           /* match your .health-form-card width */
+  padding: 8px 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0), #fff);
+  z-index: 1000;
+}
+
 .done-button {
   width: 100%;
   height: 35px;
@@ -713,6 +735,26 @@ mat-error {
   background-color: #FF6E00 !important; 
   font-size: 14px;
 }
+
+.section-header {
+  margin: 12px 0 8px;
+}
+
+.section-pill {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  align-items: center;     /* vertical center */
+  justify-content: center;
+  background: #ff7a1a;   // match your brand orange
+  color: #fff;
+  font-weight: 400;
+  height:20px;
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
+}
+
 
 }
 

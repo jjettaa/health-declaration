@@ -9,12 +9,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule }      from '@angular/material/datepicker';
-import { MatNativeDateModule }      from '@angular/material/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, map, catchError } from 'rxjs/operators';
+import { ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { MatExpansionPanel } from '@angular/material/expansion';
+import * as moment from 'moment';
+import { ValidatorFn, ValidationErrors } from '@angular/forms';
 
 type ZipOption = { code: string; place: string; state?: string };
 
@@ -32,7 +35,6 @@ type ZipOption = { code: string; place: string; state?: string };
     MatIconModule,
     MatButtonToggleModule,
     MatDatepickerModule,   
-    MatNativeDateModule,
     MatAutocompleteModule,
 
   ],
@@ -42,6 +44,9 @@ type ZipOption = { code: string; place: string; state?: string };
 
 export class HealthForm implements OnInit {
   
+   @ViewChildren(MatExpansionPanel, { read: ElementRef })
+  private panelEls!: QueryList<ElementRef<HTMLElement>>;
+
   form!: FormGroup;
   
   currentStep = 1;
@@ -333,7 +338,9 @@ dentures.valueChanges.subscribe(applyDentures);
   }
 
   // suggestions stream per FormArray row
-plzOptions$: Observable<ZipOption[]>[] = [];
+plzOptionsCond$:   Observable<ZipOption[]>[] = [];
+plzOptionsIll$:    Observable<ZipOption[]>[] = [];
+plzOptionsTreat$:  Observable<ZipOption[]>[] = [];
 
 // for displayWith
 plzDisplay = (v: any): string => {
@@ -369,28 +376,39 @@ private buildZippopotamStream(ctrl: FormControl, country: 'CH'|'DE'|'AT' = 'CH')
   get conditionsArray(): FormArray {
     return this.form.get('conditions') as FormArray;
   }
-    addCondition() {
-    const group = this.fb.group({
-      description: ['', Validators.required],
-      startDate:   [null, Validators.required],
-      endDate:     [null],
-      operated:    [null, Validators.required],
-      recovered:   [null, Validators.required],
-      doctorName:   ['', Validators.required],
-      doctorLastName:  ['', Validators.required],
-      doctorStreet: ['', Validators.required],
-      doctorStreetNo:  ['', Validators.required],
-      doctorCity:   ['', Validators.required]
-    });
-    this.conditionsArray.push(group);
+addCondition() {
+  const group = this.fb.group({
+    description: ['', Validators.required],
+    startDate:   [null, Validators.required],
+    endDate:     [null, Validators.required],
+    operated:    [null, Validators.required],
+    recovered:   [null, Validators.required],
+    doctorName:   ['', Validators.required],
+    doctorLastName:  ['', Validators.required],
+    doctorStreet: ['', Validators.required],
+    doctorStreetNo:  ['', Validators.required],
+    doctorCity:   ['', Validators.required]
+  }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
+
+  // Keep endDate revalidated if startDate changes
+  group.get('startDate')!.valueChanges.subscribe(() => {
+    group.get('endDate')!.updateValueAndValidity({ onlySelf: true });
+  });
+
+  this.conditionsArray.push(group);
 
   const idx = this.conditionsArray.length - 1;
   const plzCtrl = group.get('doctorCity') as FormControl;
-  this.plzOptions$[idx] = this.buildZippopotamStream(plzCtrl, 'CH'); 
-  }
-    removeCondition(index: number) {
-    this.conditionsArray.removeAt(index);
-  }
+  this.plzOptionsCond$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
+}
+
+removeCondition(index: number) {
+  if (this.conditionsArray.length <= 1) return;
+  this.conditionsArray.removeAt(index);
+
+  this.plzOptionsCond$?.splice(index, 1);
+  this.cd.detectChanges();
+}
 
   /** getter for Q3 entries */
 get illnessesArray(): FormArray {
@@ -402,7 +420,7 @@ addIllness() {
   const group = this.fb.group({
     description:     ['', Validators.required],
     startDate:       [null, Validators.required],
-    endDate:         [null],
+    endDate:         [null, Validators.required],
     operated:        [null, Validators.required],
     recovered:       [null, Validators.required],
     doctorName:      ['', Validators.required],
@@ -410,21 +428,35 @@ addIllness() {
     doctorStreet:    ['', Validators.required],
     doctorStreetNo:  ['', Validators.required],
     doctorCity:      ['', Validators.required]
+  }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
+
+  group.get('startDate')!.valueChanges.subscribe(() => {
+    group.get('endDate')!.updateValueAndValidity({ onlySelf: true });
   });
+
   this.illnessesArray.push(group);
+  const idx = this.illnessesArray.length - 1;
+  const plzCtrl = group.get('doctorCity') as FormControl;
+  this.plzOptionsIll$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
 }
-  removeIllness(index: number) {
-    this.illnessesArray.removeAt(index);
-  }
+
+ removeIllness(index: number) {
+  if (this.illnessesArray.length <= 1) return;
+  this.illnessesArray.removeAt(index);
+
+  this.plzOptionsIll$?.splice(index, 1);
+  this.cd.detectChanges();
+}
 
  get treatmentDetailsArray(): FormArray {
   return this.form.get('treatmentDetails') as FormArray;
 }
+
 addTreatment() {
   const group = this.fb.group({
     description:     ['', Validators.required],
     startDate:       [null, Validators.required],
-    endDate:         [null],
+    endDate:         [null, Validators.required],
     operated:        [null, Validators.required],
     recovered:       [null, Validators.required],
     doctorName:      ['', Validators.required],
@@ -432,12 +464,25 @@ addTreatment() {
     doctorStreet:    ['', Validators.required],
     doctorStreetNo:  ['', Validators.required],
     doctorCity:      ['', Validators.required]
+  }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
+
+  group.get('startDate')!.valueChanges.subscribe(() => {
+    group.get('endDate')!.updateValueAndValidity({ onlySelf: true });
   });
+
   this.treatmentDetailsArray.push(group);
+
+  const idx = this.treatmentDetailsArray.length - 1;
+  const plzCtrl = group.get('doctorCity') as FormControl;
+  this.plzOptionsTreat$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
 }
 
 removeTreatment(index: number) {
+  if (this.treatmentDetailsArray.length <= 1) return;
   this.treatmentDetailsArray.removeAt(index);
+
+  this.plzOptionsTreat$?.splice(index, 1);
+  this.cd.detectChanges();
 }
 
 onFileSelected(event: Event) {
@@ -543,9 +588,21 @@ get totalSteps(): number {
 }
 
 nextFrom(step: number) {
-  // validate current step and jump to the next
-  this.goTo(step + 1, true, step);
+  const next = step + 1;
+  if (next > this.totalSteps) return;      // ignore after the last step for now
+  this.goTo(next, true, step);
 }
+
+private scrollToStep(step: number) {
+  // panels are in DOM order; step 1 -> index 0
+  const el = this.panelEls?.toArray()[step - 1]?.nativeElement;
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // optional: tiny offset if you have a sticky header
+    // window.scrollBy({ top: -12, behavior: 'instant' as ScrollBehavior });
+  }
+}
+
 
 goTo(step: number, markTouched: boolean = true, fromStep?: number) {
   const validateStep = fromStep ?? this.currentStep;     // ← NEW
@@ -645,15 +702,21 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
     }
   }
 
-  if (!stepInvalid) {
-    if (this.currentStep === step) {
-      this.currentStep = -1;
-      this.cd.detectChanges();
-    }
-    this.currentStep = step;
-    if (step > this.maxStep) this.maxStep = step; // NEW
-
+if (!stepInvalid) {
+  if (this.currentStep === step) {
+    this.currentStep = -1;
+    this.cd.detectChanges();
   }
+  this.currentStep = step;
+  if (step > this.maxStep) this.maxStep = step;
+
+  // make sure the new panel is in the DOM, then scroll to it
+  this.cd.detectChanges();
+  setTimeout(() => {
+    if (this.currentStep === step) this.scrollToStep(step);
+  }, 0);
+}
+
 }
 
 
@@ -707,15 +770,35 @@ private setOptionalRequired(path: string, required: boolean) {
 }
 
 private scrollToFirstInvalidControl(): void {
-  const firstInvalidControl: HTMLElement = document.querySelector(
-    'form .ng-invalid'
-  ) as HTMLElement;
+  const formEl = document.querySelector('form');
+  if (!formEl) return;
 
-  if (firstInvalidControl) {
-    firstInvalidControl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    firstInvalidControl.focus();
-  }
+  // Try focusable targets inside invalid controls (Material + native)
+  const selector = [
+    // mat-inputs
+    'mat-form-field.ng-invalid input.mat-input-element:not([disabled])',
+    'mat-form-field.ng-invalid textarea.mat-input-element:not([disabled])',
+
+    // native fallbacks
+    'input.ng-invalid:not([disabled])',
+    'textarea.ng-invalid:not([disabled])',
+    'select.ng-invalid:not([disabled])',
+
+    // mat-select (focus trigger)
+    'mat-select.ng-invalid .mat-select-trigger',
+
+    // button toggle groups – focus first toggle button
+    'mat-button-toggle-group.ng-invalid .mat-button-toggle-button'
+  ].join(',');
+
+  const target = formEl.querySelector<HTMLElement>(selector);
+  if (!target) return;
+
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Prevent the focus from re-scrolling while smooth scroll is running
+  setTimeout(() => target.focus({ preventScroll: true } as FocusOptions), 0);
 }
+
 
 private findFirstInvalidStep(): number | null {
   for (const step in this.stepControls) {
@@ -731,26 +814,65 @@ private findFirstInvalidStep(): number | null {
 }
 
 onSubmit() {
-  this.form.markAllAsTouched();         
-  
-  // Find the first invalid control's step
+  // 1) show errors
+  this.form.markAllAsTouched();
+
+  // 2) find which step has the first invalid control
   const firstInvalidStep = this.findFirstInvalidStep();
-  
-  // Jump to that step so it's rendered
-  if (firstInvalidStep) {
-    this.goTo(firstInvalidStep);
+
+  if (firstInvalidStep !== null) {
+    // 3) open that panel (no need to re-touch here)
+    this.goTo(firstInvalidStep, false);
+
+    // 4) after the panel renders, scroll & focus the first invalid input
+    setTimeout(() => this.scrollToFirstInvalidControl(), 0);
+
+    console.log('❌ Form is invalid');
+    return;
   }
 
-  if (this.form.valid) {
-    console.log('✅ Form submitted', this.form.value);
-  } else {
-    console.log('❌ Form is invalid');
-    
-    // Use a slight delay to ensure Angular renders the step
-    setTimeout(() => this.scrollToFirstInvalidControl(), 100);
-  }
+  // All good
+  console.log('✅ Form submitted', this.form.value);
 }
 
+
+blockBadKeys(e: KeyboardEvent) {
+  // Disallow minus, plus, and scientific notation in <input type="number">
+  const blocked = ['-', '+', 'e', 'E'];
+  // If you want to forbid decimals too, add '.' and ',' here
+  if (blocked.includes(e.key)) e.preventDefault();
+}
+
+blockBadPaste(e: ClipboardEvent) {
+  const text = e.clipboardData?.getData('text') ?? '';
+  // Only allow digits. If you want to allow decimals, relax this regex.
+  if (!/^\d+$/.test(text)) e.preventDefault();
+}
+
+private dateRangeValidator(startKey: string, endKey: string): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    if (!(group instanceof FormGroup)) return null;
+
+    const start = group.get(startKey)?.value as moment.Moment | null;
+    const end   = group.get(endKey)?.value   as moment.Moment | null;
+
+    // Only validate when both present and valid
+    if (!start || !end || !start.isValid?.() || !end.isValid?.()) return null;
+
+    const ok = start.isSameOrBefore(end, 'day');
+
+    // Attach the error to endDate so the message shows there
+    const endCtrl = group.get(endKey)!;
+    if (!ok) {
+      endCtrl.setErrors({ ...(endCtrl.errors ?? {}), dateOrder: true });
+    } else if (endCtrl.errors && endCtrl.errors['dateOrder']) {
+      const { dateOrder, ...rest } = endCtrl.errors;
+      endCtrl.setErrors(Object.keys(rest).length ? rest : null);
+    }
+
+    return ok ? null : { dateOrderGroup: true };
+  };
+}
 
 
 }
