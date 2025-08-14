@@ -9,15 +9,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule }      from '@angular/material/datepicker';
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Observable, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, switchMap, map, catchError } from 'rxjs/operators';
-import { ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { ElementRef, QueryList, ViewChildren, ViewChild } from '@angular/core';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import * as moment from 'moment';
 import { ValidatorFn, ValidationErrors } from '@angular/forms';
+
 
 type ZipOption = { code: string; place: string; state?: string };
 
@@ -42,7 +43,7 @@ type ZipOption = { code: string; place: string; state?: string };
   styleUrls: ['./health-form.scss']
 })
 
-export class HealthForm implements OnInit {
+export class HealthForm implements OnInit, AfterViewInit {
   
    @ViewChildren(MatExpansionPanel, { read: ElementRef })
   private panelEls!: QueryList<ElementRef<HTMLElement>>;
@@ -189,37 +190,32 @@ export class HealthForm implements OnInit {
 
   });
 
-    // Always start with one condition, illness, and treatment entry
-if (this.conditionsArray.length === 0) {
-  this.addCondition();
-}
+  if (this.conditionsArray.length === 0) this.addCondition();
+  if (this.illnessesArray.length === 0) this.addIllness();
+  if (this.treatmentDetailsArray.length === 0) this.addTreatment();
 
-if (this.illnessesArray.length === 0) {
-  this.addIllness();
-}
-
-if (this.treatmentDetailsArray.length === 0) {
-  this.addTreatment();
-}
 // ---- Q2: medication -> medicationName, medicationReason, conditions[]
 const med = this.form.get('medication') as FormControl;
-const applyMed = (v: any) => {
-  const yes = v === 'yes';
+  const applyMed = (v: any) => {
+    const yes = v === 'yes';
 
-  this.setConditionalValidator('medicationName',   yes);
-  this.setConditionalValidator('medicationReason', yes);
-  this.setConditionalValidator('conditions',       yes);
+    this.setConditionalValidator('medicationName', yes);
+    this.setConditionalValidator('medicationReason', yes);
+    this.setConditionalValidator('conditions', yes);
 
-  // OPTIONAL: if you want the first row to appear only when YES and it's empty:
-  // if (yes && this.conditionsArray.length === 0) this.addCondition();
+    // reset UI state so errors don't show immediately after toggle
+    this.resetVisualState(this.form.get('medicationName')!);
+    this.resetVisualState(this.form.get('medicationReason')!);
+    this.resetVisualState(this.conditionsArray);
 
-  // NEW: reset UI state so errors don't show immediately after toggle
-  this.resetVisualState(this.form.get('medicationName')!);
-  this.resetVisualState(this.form.get('medicationReason')!);
-  this.resetVisualState(this.conditionsArray);
-};
-applyMed(med.value);
-med.valueChanges.subscribe(applyMed);
+    // 👉 EXTRA: when opening Q2 details, scroll to the block
+    if (yes) {
+      this.cd.detectChanges(); // let the *ngIf render
+      setTimeout(() => this.scrollElIntoView(this.medBlock?.nativeElement), 0);
+    }
+  };
+  applyMed(med.value);
+  med.valueChanges.subscribe(applyMed);
 
 // ---- Q3: hadIllness -> illnesses[]
 const hadIll = this.form.get('hadIllness') as FormControl;
@@ -227,31 +223,45 @@ const applyIll = (v: any) => {
   const yes = v === 'yes';
   this.setConditionalValidator('illnesses', yes);
 
-  // if (yes && this.illnessesArray.length === 0) this.addIllness();
-
-  // NEW:
+  // reset UI state so errors don't flash immediately
   this.resetVisualState(this.illnessesArray);
+
+  // 👉 when opening Q3 details, render then scroll the block into view
+  if (yes) {
+    this.cd.detectChanges(); // allow *ngIf to render the block
+    setTimeout(() => this.scrollElIntoView(this.illBlock?.nativeElement), 0);
+  }
 };
 applyIll(hadIll.value);
 hadIll.valueChanges.subscribe(applyIll);
+
 
 // ---- Q4: treatments -> treatmentDetails[], treatmentPsychologist, treatmentAlternative
 const tr = this.form.get('treatments') as FormControl;
 const applyTr = (v: any) => {
   const yes = v === 'yes';
-  this.setConditionalValidator('treatmentDetails',     yes);
+  this.setConditionalValidator('treatmentDetails',      yes);
   this.setConditionalValidator('treatmentPsychologist', yes);
   this.setConditionalValidator('treatmentAlternative',  yes);
 
-  // if (yes && this.treatmentDetailsArray.length === 0) this.addTreatment();
-
-  // NEW:
+  // reset UI so errors don’t flash
   this.resetVisualState(this.treatmentDetailsArray);
   this.resetVisualState(this.form.get('treatmentPsychologist')!);
   this.resetVisualState(this.form.get('treatmentAlternative')!);
+
+  // 👉 when opening Q4 details, render then scroll the block into view
+  if (yes) {
+    this.cd.detectChanges();
+    setTimeout(() => this.scrollElIntoView(this.treatBlock?.nativeElement), 0);
+  }
 };
 applyTr(tr.value);
 tr.valueChanges.subscribe(applyTr);
+
+// Question 5
+const docCityCtrl = this.form.get('doctorInfo.doctorCity') as FormControl;
+this.plzOptionsDoc$ = this.buildZippopotamStream(docCityCtrl, 'CH'); // or 'DE' / 'AT'
+
 
 // ---- Q16–19: missing teeth lists required only on "yes"
 ([
@@ -264,8 +274,16 @@ tr.valueChanges.subscribe(applyTr);
   const apply = () => {
     const yes = t.value === 'yes';
     this.setConditionalValidator(listPath, yes);
-    // NEW:
     this.resetVisualState(this.form.get(listPath)!);
+
+    // 👉 when opening the chart, render then scroll to it
+    if (yes) {
+      this.cd.detectChanges(); // let *ngIf render
+      setTimeout(() => {
+        const el = this.getChartEl(togglePath);
+        this.scrollElIntoView(el);
+      }, 0);
+    }
   };
   apply();
   t.valueChanges.subscribe(apply);
@@ -289,32 +307,50 @@ gum.valueChanges.subscribe(applyGum);
 // Q10 — crown
 const crown = this.form.get('crownCondition') as FormControl;
 const applyCrown = () => {
-  const req = poor(crown.value);
+  const req = poor(crown.value); // 'mangelhaft' or 'schlecht'
   this.setOptionalRequired('crownLocation', req);
-  if (req) this.resetVisualState(this.form.get('crownLocation')!);
+  if (req) {
+    this.resetVisualState(this.form.get('crownLocation')!);
+    // scroll to the input block after it renders
+    this.cd.detectChanges();
+    setTimeout(() => this.scrollElIntoView(this.crownBlock?.nativeElement), 0);
+  }
 };
 applyCrown();
 crown.valueChanges.subscribe(applyCrown);
 
+
 // Q11 — bridge
 const bridge = this.form.get('bridgeCondition') as FormControl;
 const applyBridge = () => {
-  const req = poor(bridge.value);
+  const req = poor(bridge.value); // true for 'mangelhaft' or 'schlecht'
   this.setOptionalRequired('bridgeLocation', req);
-  if (req) this.resetVisualState(this.form.get('bridgeLocation')!);
+  if (req) {
+    this.resetVisualState(this.form.get('bridgeLocation')!);
+    // Let *ngIf render, then scroll to the block
+    this.cd.detectChanges();
+    setTimeout(() => this.scrollElIntoView(this.bridgeBlock?.nativeElement), 0);
+  }
 };
 applyBridge();
 bridge.valueChanges.subscribe(applyBridge);
 
+
 // Q12 — dentures
 const dentures = this.form.get('denturesCondition') as FormControl;
 const applyDentures = () => {
-  const req = poor(dentures.value);
+  const req = poor(dentures.value); // true for 'mangelhaft' or 'schlecht'
   this.setOptionalRequired('denturesLocation', req);
-  if (req) this.resetVisualState(this.form.get('denturesLocation')!);
+  if (req) {
+    this.resetVisualState(this.form.get('denturesLocation')!);
+    // Let *ngIf render, then scroll to the block
+    this.cd.detectChanges();
+    setTimeout(() => this.scrollElIntoView(this.denturesBlock?.nativeElement), 0);
+  }
 };
 applyDentures();
 dentures.valueChanges.subscribe(applyDentures);
+
 
 // Q13–Q15 + Q20: toggle -> details (required only when YES; never disabled)
 ([
@@ -324,23 +360,44 @@ dentures.valueChanges.subscribe(applyDentures);
   ['dentistTreatment', 'dentistTreatmentDetails'],
 ] as const).forEach(([togglePath, detailsPath]) => {
   const t = this.form.get(togglePath) as FormControl;
+
+  const blockElFor = (name: typeof togglePath): HTMLElement | undefined => {
+    switch (name) {
+      case 'dentalAnomaly':    return this.dentalAnomalyBlock?.nativeElement;
+      case 'jawDeformity':     return this.jawBlock?.nativeElement;
+      case 'toothIllness':     return this.toothIllnessBlock?.nativeElement;
+      case 'dentistTreatment': return this.dentistTreatmentBlock?.nativeElement;
+    }
+  };
+
   const apply = () => {
     const yes = t.value === 'yes';
-    // make it required or not, but keep it enabled so the user can type
+
+    // keep enabled; only toggle "required"
     this.setOptionalRequired(detailsPath, yes);
 
-    // prevent the red error from showing immediately when switching NO -> YES
-    if (yes) this.resetVisualState(this.form.get(detailsPath)!);
+    if (yes) {
+      // clear stale errors/UI
+      this.resetVisualState(this.form.get(detailsPath)!);
+
+      // let *ngIf render the block, then scroll to it
+      this.cd.detectChanges();
+      setTimeout(() => this.scrollElIntoView(blockElFor(togglePath)), 0);
+    }
   };
+
   apply();
   t.valueChanges.subscribe(apply);
 });
+
   }
 
   // suggestions stream per FormArray row
 plzOptionsCond$:   Observable<ZipOption[]>[] = [];
 plzOptionsIll$:    Observable<ZipOption[]>[] = [];
 plzOptionsTreat$:  Observable<ZipOption[]>[] = [];
+plzOptionsDoc$?: Observable<ZipOption[]>;
+
 
 // for displayWith
 plzDisplay = (v: any): string => {
@@ -400,6 +457,12 @@ addCondition() {
   const idx = this.conditionsArray.length - 1;
   const plzCtrl = group.get('doctorCity') as FormControl;
   this.plzOptionsCond$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
+
+    this.cd.detectChanges();
+  setTimeout(() => {
+    const target = this.condEntryEls?.last?.nativeElement ?? this.medBlock?.nativeElement;
+    this.scrollElIntoView(target);
+  }, 0);
 }
 
 removeCondition(index: number) {
@@ -438,6 +501,11 @@ addIllness() {
   const idx = this.illnessesArray.length - 1;
   const plzCtrl = group.get('doctorCity') as FormControl;
   this.plzOptionsIll$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
+
+  this.cd.detectChanges();
+setTimeout(() => {
+  this.scrollElIntoView(this.illEntryEls?.last?.nativeElement ?? this.illBlock?.nativeElement);
+}, 0);
 }
 
  removeIllness(index: number) {
@@ -475,6 +543,12 @@ addTreatment() {
   const idx = this.treatmentDetailsArray.length - 1;
   const plzCtrl = group.get('doctorCity') as FormControl;
   this.plzOptionsTreat$[idx] = this.buildZippopotamStream(plzCtrl, 'CH');
+
+  this.cd.detectChanges();
+setTimeout(() => {
+  this.scrollElIntoView(this.treatEntryEls?.last?.nativeElement ?? this.treatBlock?.nativeElement);
+}, 0);
+
 }
 
 removeTreatment(index: number) {
@@ -503,6 +577,11 @@ isFileUploaded(): boolean {
   return file instanceof File && !!file.name;
 }
 
+pair1A = [55,54,53,52,51];  pair1B = [85,84,83,82,81];
+pair2A = [18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28];
+pair2B = [48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
+pair3A = [61,62,63,64,65];  pair3B = [71,72,73,74,75];
+
 //Question 16
 get missingTeethList(): FormArray {
   return this.form.get('missingTeethList') as FormArray;
@@ -521,10 +600,10 @@ isToothSelected(tooth: number): boolean {
   return this.missingTeethList.value.includes(tooth);
 }
 
-isAnyToothSelected(): boolean {
-  return this.missingTeethList.length > 0;
+isAnySelectedInPair(a: number[], b: number[]): boolean {
+  const sel: number[] = (this.missingTeethList?.value ?? []) as number[];
+  return a.some(t => sel.includes(t)) || b.some(t => sel.includes(t));
 }
-
 
 //Question 17
 get missingTeethList2(): FormArray {
@@ -545,10 +624,10 @@ isToothSelected2(tooth: number): boolean {
   return this.missingTeethList2.value.includes(tooth);
 }
 
-isAnyToothSelected2(): boolean {
-  return this.missingTeethList2.length > 0;
+isAnySelectedInPair2(a: number[], b: number[]): boolean {
+  const sel: number[] = (this.missingTeethList2?.value ?? []) as number[];
+  return a.some(t => sel.includes(t)) || b.some(t => sel.includes(t));
 }
-
 
 //Question 18
 get missingTeethList3(): FormArray {
@@ -562,8 +641,10 @@ toggleTooth3(tooth: number): void {
 isToothSelected3(tooth: number): boolean {
   return this.missingTeethList3.value.includes(tooth);
 }
-isAnyToothSelected3(): boolean {
-  return this.missingTeethList3.length > 0;
+
+isAnySelectedInPair3(a: number[], b: number[]): boolean {
+  const sel: number[] = (this.missingTeethList3?.value ?? []) as number[];
+  return a.some(t => sel.includes(t)) || b.some(t => sel.includes(t));
 }
 
 
@@ -579,19 +660,32 @@ toggleTooth4(tooth: number): void {
 isToothSelected4(tooth: number): boolean {
   return this.missingTeethList4.value.includes(tooth);
 }
-isAnyToothSelected4(): boolean {
-  return this.missingTeethList4.length > 0;
+
+isAnySelectedInPair4(a: number[], b: number[]): boolean {
+  const sel: number[] = (this.missingTeethList4?.value ?? []) as number[];
+  return a.some(t => sel.includes(t)) || b.some(t => sel.includes(t));
 }
+
 
 get totalSteps(): number {
   return Object.keys(this.stepControls).length;
 }
 
 nextFrom(step: number) {
+  console.log('nextFrom fired at step', step, 'total=', this.totalSteps);
   const next = step + 1;
-  if (next > this.totalSteps) return;      // ignore after the last step for now
+
+   if (step === this.totalSteps) {
+    this.currentStep = -1;        // ✅ collapse the last panel → hides the button
+    this.cd.detectChanges();
+    this.goToDone();              // scroll to Done
+    return;
+  }
+
+  if (next > this.totalSteps) return;
   this.goTo(next, true, step);
 }
+
 
 private scrollToStep(step: number) {
   // panels are in DOM order; step 1 -> index 0
@@ -602,6 +696,25 @@ private scrollToStep(step: number) {
     // window.scrollBy({ top: -12, behavior: 'instant' as ScrollBehavior });
   }
 }
+
+@ViewChild('chart16') chart16?: ElementRef<HTMLElement>;
+@ViewChild('chart17') chart17?: ElementRef<HTMLElement>;
+@ViewChild('chart18') chart18?: ElementRef<HTMLElement>;
+@ViewChild('chart19') chart19?: ElementRef<HTMLElement>;
+@ViewChild('medBlock') medBlock?: ElementRef<HTMLElement>;
+@ViewChildren('condEntry') condEntryEls?: QueryList<ElementRef<HTMLElement>>;
+@ViewChild('illBlock') illBlock?: ElementRef<HTMLElement>;
+@ViewChildren('illEntry') illEntryEls?: QueryList<ElementRef<HTMLElement>>;
+@ViewChild('treatBlock') treatBlock?: ElementRef<HTMLElement>;
+@ViewChildren('treatEntry') treatEntryEls?: QueryList<ElementRef<HTMLElement>>;
+@ViewChild('crownBlock') crownBlock?: ElementRef<HTMLElement>;
+@ViewChild('bridgeBlock') bridgeBlock?: ElementRef<HTMLElement>;
+@ViewChild('denturesBlock') denturesBlock?: ElementRef<HTMLElement>;
+@ViewChild('dentalAnomalyBlock') dentalAnomalyBlock?: ElementRef<HTMLElement>;
+@ViewChild('jawBlock')           jawBlock?: ElementRef<HTMLElement>;
+@ViewChild('dentistTreatmentBlock') dentistTreatmentBlock?: ElementRef<HTMLElement>;
+@ViewChild('toothIllnessBlock') toothIllnessBlock?: ElementRef<HTMLElement>;
+
 
 
 goTo(step: number, markTouched: boolean = true, fromStep?: number) {
@@ -702,6 +815,21 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
     }
   }
 
+    if (stepInvalid) {
+    if (this.currentStep !== validateStep) this.currentStep = validateStep;
+
+    this.cd.detectChanges();
+    setTimeout(() => {
+      // ensure panel is visible, then focus inside *this* panel only
+      this.scrollToStep(validateStep);
+      const panel = this.panelEls?.toArray()[validateStep - 1]?.nativeElement;
+      this.scrollToFirstInvalidControl(panel);
+    }, 0);
+
+    return; // don't advance
+  }
+
+
 if (!stepInvalid) {
   if (this.currentStep === step) {
     this.currentStep = -1;
@@ -769,35 +897,30 @@ private setOptionalRequired(path: string, required: boolean) {
   c.updateValueAndValidity({ emitEvent: false });
 }
 
-private scrollToFirstInvalidControl(): void {
-  const formEl = document.querySelector('form');
-  if (!formEl) return;
+/** Focus + scroll the first invalid control (optionally scoped to a root element). */
+private scrollToFirstInvalidControl(root?: HTMLElement): void {
+  // If a panel root is provided, search inside it; else fall back to the whole form.
+  const container: HTMLElement | null =
+    root ?? (document.querySelector('form') as HTMLElement | null);
+  if (!container) return;
 
-  // Try focusable targets inside invalid controls (Material + native)
   const selector = [
-    // mat-inputs
     'mat-form-field.ng-invalid input.mat-input-element:not([disabled])',
     'mat-form-field.ng-invalid textarea.mat-input-element:not([disabled])',
-
-    // native fallbacks
     'input.ng-invalid:not([disabled])',
     'textarea.ng-invalid:not([disabled])',
     'select.ng-invalid:not([disabled])',
-
-    // mat-select (focus trigger)
     'mat-select.ng-invalid .mat-select-trigger',
-
-    // button toggle groups – focus first toggle button
     'mat-button-toggle-group.ng-invalid .mat-button-toggle-button'
   ].join(',');
 
-  const target = formEl.querySelector<HTMLElement>(selector);
+  const target = container.querySelector<HTMLElement>(selector);
   if (!target) return;
 
   target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  // Prevent the focus from re-scrolling while smooth scroll is running
   setTimeout(() => target.focus({ preventScroll: true } as FocusOptions), 0);
 }
+
 
 
 private findFirstInvalidStep(): number | null {
@@ -872,6 +995,69 @@ private dateRangeValidator(startKey: string, endKey: string): ValidatorFn {
 
     return ok ? null : { dateOrderGroup: true };
   };
+}
+
+
+ngAfterViewInit(): void {
+  // Detect real page reload (keeps back/forward scroll restore working)
+  const nav = (performance.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined);
+  const isReload = nav ? nav.type === 'reload' : (performance as any).navigation?.type === 1;
+
+  if (isReload) {
+    const prev = (history as any).scrollRestoration;
+    try { (history as any).scrollRestoration = 'manual'; } catch {}
+
+    // Start at the very top so the sticky header doesn't cover Q1
+    setTimeout(() => {
+      (document.scrollingElement || document.documentElement)
+        .scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
+      // Restore default so back/forward still restores scroll
+      try { (history as any).scrollRestoration = prev ?? 'auto'; } catch {}
+    }, 0);
+  }
+
+  // Optional: set the CSS variable to the *actual* header height dynamically
+  const header = document.querySelector('.health-form-header') as HTMLElement | null;
+  if (header) {
+    document.documentElement.style.setProperty('--header-offset', `${header.offsetHeight}px`);
+  }
+}
+
+private scrollElIntoView(el?: HTMLElement) {
+  if (!el) return;
+  // read CSS var if you set --header-offset; fall back to 0
+  const header = parseInt(
+    getComputedStyle(document.documentElement).getPropertyValue('--header-offset')
+  ) || 0;
+  const y = el.getBoundingClientRect().top + window.scrollY - header - 8;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+
+private getChartEl(togglePath: string): HTMLElement | undefined {
+  switch (togglePath) {
+    case 'missingTeeth':  return this.chart16?.nativeElement;
+    case 'missingTeeth2': return this.chart17?.nativeElement;
+    case 'missingTeeth3': return this.chart18?.nativeElement;
+    case 'missingTeeth4': return this.chart19?.nativeElement;
+    default: return undefined;
+  }
+}
+
+@ViewChild('doneBtn') doneBtn!: ElementRef<HTMLButtonElement>;
+
+goToDone(): void {
+  console.log('goToDone called');
+  this.cd.detectChanges();
+  setTimeout(() => {
+    const el = this.doneBtn?.nativeElement;
+    if (el) {
+      this.scrollElIntoView(el); // your existing scroll helper
+      setTimeout(() => el.focus({ preventScroll: true }), 150);
+    } else {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
+  }, 0);
 }
 
 
