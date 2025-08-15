@@ -18,7 +18,9 @@ import { ElementRef, QueryList, ViewChildren, ViewChild } from '@angular/core';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import * as moment from 'moment';
 import { ValidatorFn, ValidationErrors } from '@angular/forms';
-
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { TemplateRef } from '@angular/core'; // you already import from core; just add TemplateRef
+import { FormGroupDirective } from '@angular/forms';
 
 type ZipOption = { code: string; place: string; state?: string };
 
@@ -37,6 +39,7 @@ type ZipOption = { code: string; place: string; state?: string };
     MatButtonToggleModule,
     MatDatepickerModule,   
     MatAutocompleteModule,
+    MatDialogModule,
 
   ],
   templateUrl: './health-form.html',
@@ -86,9 +89,11 @@ export class HealthForm implements OnInit, AfterViewInit {
 
   };
 
+  @ViewChild('thxTpl') thxTpl!: TemplateRef<any>;
   constructor(private fb: FormBuilder,
               private cd: ChangeDetectorRef,
               private http: HttpClient,
+              private dialog: MatDialog, 
   ) {}
 
   ngOnInit() {
@@ -675,27 +680,37 @@ nextFrom(step: number) {
   console.log('nextFrom fired at step', step, 'total=', this.totalSteps);
   const next = step + 1;
 
-   if (step === this.totalSteps) {
-    this.currentStep = -1;        // ✅ collapse the last panel → hides the button
-    this.cd.detectChanges();
-    this.goToDone();              // scroll to Done
-    return;
+  // Handle the last step (22)
+  if (step === this.totalSteps) {
+    const ctrl = this.form.get('treatmentRemarks');
+    ctrl?.markAsTouched();
+    ctrl?.updateValueAndValidity();
+
+    if (ctrl?.invalid) {
+      this.currentStep = 22;
+      this.cd.detectChanges();
+      setTimeout(() => {
+        const panel = this.panelEls?.toArray()[21]?.nativeElement; // step 22 => index 21
+        this.scrollToFirstInvalidControl(panel);
+      }, 0);
+      return;
+    }
+
+    // ✅ mark step 22 completed (same mechanism as goTo)
+    this.completedSteps.add(step); // or this.completedSteps.add(this.totalSteps);
+
   }
 
+  // Normal flow for steps 1..21
   if (next > this.totalSteps) return;
   this.goTo(next, true, step);
 }
 
-
 private scrollToStep(step: number) {
-  // panels are in DOM order; step 1 -> index 0
   const el = this.panelEls?.toArray()[step - 1]?.nativeElement;
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // optional: tiny offset if you have a sticky header
-    // window.scrollBy({ top: -12, behavior: 'instant' as ScrollBehavior });
-  }
+  this.scrollElIntoView(el);  // <-- always use the offset-aware scroll
 }
+
 
 @ViewChild('chart16') chart16?: ElementRef<HTMLElement>;
 @ViewChild('chart17') chart17?: ElementRef<HTMLElement>;
@@ -716,10 +731,12 @@ private scrollToStep(step: number) {
 @ViewChild('toothIllnessBlock') toothIllnessBlock?: ElementRef<HTMLElement>;
 
 
+private completedSteps = new Set<number>();
+isStepDone = (s: number) => this.completedSteps.has(s);
 
 goTo(step: number, markTouched: boolean = true, fromStep?: number) {
-  const validateStep = fromStep ?? this.currentStep;     // ← NEW
-  const controls = this.stepControls[validateStep] || []; // ← CHANGED (was this.currentStep)
+  const validateStep = fromStep ?? this.currentStep;     
+  const controls = this.stepControls[validateStep] || []; 
   let stepInvalid = false;
 
   const medicationValue = this.form.get('medication')?.value;
@@ -738,7 +755,6 @@ goTo(step: number, markTouched: boolean = true, fromStep?: number) {
   const missingTeeth3Value = this.form.get('missingTeeth3')?.value;
   const missingTeeth4Value = this.form.get('missingTeeth4')?.value;
 
-  // Set conditional validators
 
   this.setConditionalValidator('dentalAnomalyDeetz', dentalAnomalyValue === 'yes');
   this.setConditionalValidator('jawDeformityDeetz', jawDeformityValue === 'yes');
@@ -748,24 +764,19 @@ goTo(step: number, markTouched: boolean = true, fromStep?: number) {
   this.setConditionalValidator('missingTeethList2', missingTeeth2Value === 'yes');
   this.setConditionalValidator('missingTeethList3', missingTeeth3Value === 'yes');
   this.setConditionalValidator('missingTeethList4', missingTeeth4Value === 'yes');
-  // Apply conditional validators based on user input
-this.setConditionalValidator('medicationName', medicationValue === 'yes');
-this.setConditionalValidator('medicationReason', medicationValue === 'yes');
-this.setConditionalValidator('conditions', medicationValue === 'yes');
-
-this.setConditionalValidator('illnesses', hadIllnessValue === 'yes');
-
-this.setConditionalValidator('treatmentDetails', treatmentsValue === 'yes');
-this.setConditionalValidator('treatmentPsychologist', treatmentsValue === 'yes');
-this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
-
+  this.setConditionalValidator('medicationName', medicationValue === 'yes');
+  this.setConditionalValidator('medicationReason', medicationValue === 'yes');
+  this.setConditionalValidator('conditions', medicationValue === 'yes');
+  this.setConditionalValidator('illnesses', hadIllnessValue === 'yes');
+  this.setConditionalValidator('treatmentDetails', treatmentsValue === 'yes');
+  this.setConditionalValidator('treatmentPsychologist', treatmentsValue === 'yes');
+  this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
 
   if (missingTeethValue === 'yes') this.form.get('missingTeethList')?.markAsTouched();
   if (missingTeeth2Value === 'yes') this.form.get('missingTeethList2')?.markAsTouched();
   if (missingTeeth3Value === 'yes') this.form.get('missingTeethList3')?.markAsTouched();
   if (missingTeeth4Value === 'yes') this.form.get('missingTeethList4')?.markAsTouched();
 
-  // Only mark fields as touched if instructed
   if (markTouched) {
     for (const name of controls) {
       if (medicationValue === 'no' && ['medicationName', 'medicationReason', 'conditions'].includes(name)) continue;
@@ -820,7 +831,7 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
 
     this.cd.detectChanges();
     setTimeout(() => {
-      // ensure panel is visible, then focus inside *this* panel only
+
       this.scrollToStep(validateStep);
       const panel = this.panelEls?.toArray()[validateStep - 1]?.nativeElement;
       this.scrollToFirstInvalidControl(panel);
@@ -831,6 +842,8 @@ this.setConditionalValidator('treatmentAlternative', treatmentsValue === 'yes');
 
 
 if (!stepInvalid) {
+  this.completedSteps.add(validateStep);
+
   if (this.currentStep === step) {
     this.currentStep = -1;
     this.cd.detectChanges();
@@ -838,7 +851,6 @@ if (!stepInvalid) {
   this.currentStep = step;
   if (step > this.maxStep) this.maxStep = step;
 
-  // make sure the new panel is in the DOM, then scroll to it
   this.cd.detectChanges();
   setTimeout(() => {
     if (this.currentStep === step) this.scrollToStep(step);
@@ -847,13 +859,12 @@ if (!stepInvalid) {
 
 }
 
-
 private setConditionalValidator(controlName: string, shouldBeRequired: boolean) {
   const control = this.form.get(controlName);
   if (!control) return;
 
   if (shouldBeRequired) {
-    control.enable({ emitEvent: false }); // re-enable when YES
+    control.enable({ emitEvent: false }); 
     if (control instanceof FormArray) {
       control.setValidators([Validators.required, Validators.minLength(1)]);
     } else {
@@ -884,7 +895,6 @@ private setOptionalRequired(path: string, required: boolean) {
   const c = this.form.get(path);
   if (!c) return;
 
-  // always enabled so the user can type
   c.enable({ emitEvent: false });
 
   if (required) {
@@ -892,12 +902,10 @@ private setOptionalRequired(path: string, required: boolean) {
   } else {
     c.clearValidators();
   }
-  // clear old errors (prevents stale red messages)
   c.setErrors(null);
   c.updateValueAndValidity({ emitEvent: false });
 }
 
-/** Focus + scroll the first invalid control (optionally scoped to a root element). */
 private scrollToFirstInvalidControl(root?: HTMLElement): void {
   // If a panel root is provided, search inside it; else fall back to the whole form.
   const container: HTMLElement | null =
@@ -920,8 +928,6 @@ private scrollToFirstInvalidControl(root?: HTMLElement): void {
   target.scrollIntoView({ behavior: 'smooth', block: 'center' });
   setTimeout(() => target.focus({ preventScroll: true } as FocusOptions), 0);
 }
-
-
 
 private findFirstInvalidStep(): number | null {
   for (const step in this.stepControls) {
@@ -954,13 +960,35 @@ onSubmit() {
     return;
   }
 
-  // All good
   console.log('✅ Form submitted', this.form.value);
+
+const ref = this.dialog.open(this.thxTpl, {
+    disableClose: true,
+    autoFocus: true,     // focus moves INSIDE the dialog
+    restoreFocus: false, // prevent focusing your Done button when closing
+    width: '420px',
+    panelClass: 'thx-dialog'
+  });
+
+  ref.afterClosed().subscribe(() => {
+    this.resetFormToStart();        // reset only AFTER overlay is gone
+    this.cd.detectChanges();
+    setTimeout(() => {
+      this.currentStep = 1;
+      this.maxStep = 1;
+      this.cd.detectChanges();
+      this.scrollToStep(1);
+      // optionally focus first input:
+      const first = document.querySelector('input[name="height"]') as HTMLElement;
+      first?.focus();
+    }, 0);
+  });
+
+
 }
 
 
 blockBadKeys(e: KeyboardEvent) {
-  // Disallow minus, plus, and scientific notation in <input type="number">
   const blocked = ['-', '+', 'e', 'E'];
   // If you want to forbid decimals too, add '.' and ',' here
   if (blocked.includes(e.key)) e.preventDefault();
@@ -1047,18 +1075,55 @@ private getChartEl(togglePath: string): HTMLElement | undefined {
 @ViewChild('doneBtn') doneBtn!: ElementRef<HTMLButtonElement>;
 
 goToDone(): void {
-  console.log('goToDone called');
   this.cd.detectChanges();
   setTimeout(() => {
     const el = this.doneBtn?.nativeElement;
     if (el) {
-      this.scrollElIntoView(el); // your existing scroll helper
-      setTimeout(() => el.focus({ preventScroll: true }), 150);
+      this.scrollElIntoView(el); // no focus here
     } else {
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }
   }, 0);
 }
 
+
+@ViewChild(FormGroupDirective) private formDir?: FormGroupDirective;
+
+private resetFormToStart() {
+  this.formDir?.resetForm();
+
+  // Re-enable everything to a sane baseline first
+  this.form.enable({ emitEvent: false });
+
+  this.form.reset({}, { emitEvent: false });
+
+  this.conditionsArray.clear();
+  this.illnessesArray.clear();
+  this.treatmentDetailsArray.clear();
+  (this.form.get('missingTeethList')  as FormArray).clear();
+  (this.form.get('missingTeethList2') as FormArray).clear();
+  (this.form.get('missingTeethList3') as FormArray).clear();
+  (this.form.get('missingTeethList4') as FormArray).clear();
+
+  if (this.conditionsArray.length === 0) this.addCondition();
+  if (this.illnessesArray.length === 0) this.addIllness();
+  if (this.treatmentDetailsArray.length === 0) this.addTreatment();
+
+  // Make all conditional fields optional & enabled (not required, no errors)
+  [
+    'medicationName','medicationReason','conditions','illnesses',
+    'treatmentDetails','treatmentPsychologist','treatmentAlternative',
+    'dentalAnomalyDeetz','jawDeformityDeetz','toothIllnessDeetz',
+    'dentistTreatmentDetails',
+    'missingTeethList','missingTeethList2','missingTeethList3','missingTeethList4',
+  ].forEach(p => this.setOptionalRequired(p, false)); // note: keep enabled, just not required
+
+  ['gumLocation','crownLocation','bridgeLocation','denturesLocation']
+    .forEach(p => this.setOptionalRequired(p, false));
+
+  this.completedSteps.clear();
+  this.currentStep = 1;
+  this.maxStep = 1;
+}
 
 }

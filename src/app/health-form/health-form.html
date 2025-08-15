@@ -66,8 +66,8 @@
   </p>
         </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 1 && 1 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(1)">
+  <div class="panel-actions" *ngIf="currentStep === 1 && !isStepDone(1)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(1)">
       Weiter
     </button>
   </div>
@@ -315,8 +315,8 @@
     </div>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 2 && 2 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(2)">Weiter</button>
+  <div class="panel-actions" *ngIf="currentStep === 2 && !isStepDone(2)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(2)">Weiter</button>
   </div>
 </mat-expansion-panel>
 
@@ -578,8 +578,8 @@
   </div>
 
   <!-- NEXT button: only visible if this is the current step -->
-  <div class="panel-actions" *ngIf="currentStep === 3 && 3 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(3)">
+  <div class="panel-actions" *ngIf="currentStep === 3 && !isStepDone(3)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(3)">
       Weiter
     </button>
   </div>
@@ -626,6 +626,7 @@
       <mat-button-toggle-group
         formControlName="hospitalTreatment"
         class="med-toggle-group"
+        [class.selected]="form.get('hospitalTreatment')?.value !== null"
         aria-label="Spital?"
       >
         <mat-button-toggle value="no">Nein</mat-button-toggle>
@@ -640,6 +641,7 @@
       <mat-button-toggle-group
         formControlName="doctorTreatment"
         class="med-toggle-group"
+        [class.selected]="form.get('doctorTreatment')?.value !== null"
         aria-label="Arzt?"
       >
         <mat-button-toggle value="no">Nein</mat-button-toggle>
@@ -873,6 +875,7 @@
       <mat-button-toggle-group
         formControlName="treatmentPsychologist"
         class="med-toggle-group"
+        [class.selected]="form.get('treatmentPsychologist')?.value !== null"
         aria-label="Spital?"
       >
         <mat-button-toggle value="no">Nein</mat-button-toggle>
@@ -887,6 +890,7 @@
       <mat-button-toggle-group
         formControlName="treatmentAlternative"
         class="med-toggle-group"
+        [class.selected]="form.get('treatmentAlternative')?.value !== null"
         aria-label="Arzt?"
       >
         <mat-button-toggle value="no">Nein</mat-button-toggle>
@@ -899,8 +903,8 @@
     </div> <!-- /#treatBlock -->
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 4 && 4 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(4)">
+  <div class="panel-actions" *ngIf="currentStep === 4 && !isStepDone(4)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(4)">
       Weiter
     </button>
   </div>
@@ -1011,8 +1015,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 5 && 5 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(5)">
+  <div class="panel-actions" *ngIf="currentStep === 5 && !isStepDone(5)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(5)">
       Weiter
     </button>
   </div>
@@ -1061,8 +1065,8 @@
     </mat-error>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 6 && 6 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(6)">
+  <div class="panel-actions" *ngIf="currentStep === 6 && !isStepDone(6)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(6)">
       Weiter
     </button>
   </div>
@@ -1129,8 +1133,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 7 && 7 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(7)">
+  <div class="panel-actions" *ngIf="currentStep === 7 && !isStepDone(7)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(7)">
       Weiter
     </button>
   </div>
@@ -1163,8 +1167,8 @@
     </mat-error>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 8 && 8 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(8)">
+  <div class="panel-actions" *ngIf="currentStep === 8 && !isStepDone(8)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(8)">
       Weiter
     </button>
   </div>
@@ -1199,8 +1203,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 9 && 9 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(9)">
+  <div class="panel-actions" *ngIf="currentStep === 9 && !isStepDone(9)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(9)">
       Weiter
     </button>
   </div>
@@ -1263,8 +1267,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 10 && 10 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(10)">
+  <div class="panel-actions" *ngIf="currentStep === 10 && !isStepDone(10)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(10)">
       Weiter
     </button>
   </div>
@@ -1329,8 +1333,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 11 && 11 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(11)">
+  <div class="panel-actions" *ngIf="currentStep === 11 && !isStepDone(11)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(11)">
       Weiter
     </button>
   </div>
@@ -1395,8 +1399,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 12 && 12 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(12)">
+  <div class="panel-actions" *ngIf="currentStep === 12 && !isStepDone(12)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(12)">
       Weiter
     </button>
   </div>
@@ -1460,8 +1464,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 13 && 13 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(13)">
+  <div class="panel-actions" *ngIf="currentStep === 13 && !isStepDone(13)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(13)">
       Weiter
     </button>
   </div>
@@ -1524,8 +1528,8 @@
     </ng-container>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 14 && 14 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(14)">
+  <div class="panel-actions" *ngIf="currentStep === 14 && !isStepDone(14)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(14)">
       Weiter
     </button>
   </div>
@@ -1589,8 +1593,8 @@
     </ng-container>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 15 && 15 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(15)">
+  <div class="panel-actions" *ngIf="currentStep === 15 && !isStepDone(15)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(15)">
       Weiter
     </button>
   </div>
@@ -1820,8 +1824,8 @@
 
   </div> <!-- end step-content -->
 
-  <div class="panel-actions" *ngIf="currentStep === 16 && 16 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(16)">
+  <div class="panel-actions" *ngIf="currentStep === 16 && !isStepDone(16)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(16)">
       Weiter
     </button>
   </div>
@@ -2029,8 +2033,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 17 && 17 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(17)">
+  <div class="panel-actions" *ngIf="currentStep === 17 && !isStepDone(17)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(17)">
       Weiter
     </button>
   </div>
@@ -2237,8 +2241,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 18 && 18 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(18)">
+  <div class="panel-actions" *ngIf="currentStep === 18 && !isStepDone(18)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(18)">
       Weiter
     </button>
   </div>
@@ -2466,8 +2470,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 19 && 19 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(19)">
+  <div class="panel-actions" *ngIf="currentStep === 19 && !isStepDone(19)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(19)">
       Weiter
     </button>
   </div>
@@ -2530,8 +2534,8 @@
 
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 20 && 20 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(20)">
+  <div class="panel-actions" *ngIf="currentStep === 20 && !isStepDone(20)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(20)">
       Weiter
     </button>
   </div>
@@ -2571,8 +2575,8 @@
     </div>
   </div>
 
-  <div class="panel-actions" *ngIf="currentStep === 21 && 21 < totalSteps">
-    <button class="next-button" mat-flat-button color="primary" (click)="nextFrom(21)">
+  <div class="panel-actions" *ngIf="currentStep === 21 && !isStepDone(21)">
+    <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(21)">
       Weiter
     </button>
   </div>
@@ -2610,7 +2614,7 @@
     </div>
   </div>
 
-<div class="panel-actions" *ngIf="currentStep === 22">
+<div class="panel-actions" *ngIf="currentStep === 22 && !isStepDone(22)">
   <button
     class="next-button"
     mat-flat-button
@@ -2626,24 +2630,43 @@
 
 
 
+
 </mat-expansion-panel>
 
 
-<div class="form-actions">
-  <button
-    id="done-button"
-    #doneBtn
-    mat-raised-button
-    color="primary"
-    class="done-button"
-    (click)="onSubmit()"
-  >
-    Done
-  </button>
-</div>
+  <div class="form-actions">
+    <button
+      id="done-button"
+      #doneBtn
+      mat-raised-button
+      color="primary"
+      class="done-button"
+      type="button"           
+      (click)="onSubmit()"
+    >
+      Done
+    </button>
+  </div>
 
 
     </mat-accordion>
   </form>
+
+  <ng-template #thxTpl>
+  <h2 mat-dialog-title>Danke!</h2>
+  <mat-dialog-content>
+    <p>Ihre Antworten wurden registriert.</p>
+    <p>Sie können jetzt zum Anfang zurückkehren.</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <!-- Closing the dialog triggers reset via afterClosed() -->
+    <!-- inside your thxTpl -->
+<button mat-flat-button type="button" class="btn-orange"color="primary" [mat-dialog-close]="true" cdkFocusInitial>
+  Zurück zum Anfang
+</button>
+
+  </mat-dialog-actions>
+</ng-template>
+
 </div>
 </div>
