@@ -15,9 +15,9 @@
 }
 
 .health-form-header {
-  position: sticky;  /* make it stick when scrolling */
-  top: 0;            /* stick to top of container */
-  z-index: 100;      /* stay above the accordion content */
+  position: sticky;  
+  top: 0;           
+  z-index: 100;     
 
   display: flex;
   align-items: center;
@@ -25,7 +25,7 @@
   height: 56px;            
   padding-top: 20px;
   padding-bottom: 15px;
-  background: #fff;  /* ensure content behind it doesn't show through */
+  background: #fff; 
 
   h2 {
     margin: 0;
@@ -46,7 +46,6 @@
     }
   }
 }
-
 
 .health-form-accordion {
 
@@ -411,7 +410,7 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 
 .add-condition-btn {
   height: 35px;
-  line-height: 35px;               // vertically center the text
+  line-height: 35px;               
   background-color: 	#FF6E00 !important;
   color: #fff        !important;
   font-size: 13px;
@@ -438,12 +437,12 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 }
 
 .toggle-error {
-  display: block;          // mat-error is inline by default
-  margin-top: -12px;         // same spacing as under inputs
-  margin-left: 8px;          // align flush with toggle
-  font-size: 11px;      // match your other errors
+  display: block;          
+  margin-top: -12px;         
+  margin-left: 8px;        
+  font-size: 11px;     
   font-weight: 400;
-  color: #f44336;          // Material Red 500 (or your custom error color)
+  color: #f44336;         
   letter-spacing: 0;
 }
 
@@ -480,7 +479,7 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 }
 
 .dental-button {
-  background-color: #FF6E00 !important; // Yellow
+  background-color: #FF6E00 !important; 
   color: #fff  !important;
   border-radius: 32px;
   font-weight: 500;
@@ -514,7 +513,7 @@ background-color: rgba(255, 218, 185, 0.15) !important;
 }
 
 .tooth-number-label {
-  width: 48px; // match your .tooth-box width
+  width: 48px; 
   text-align: center;
   font-size: 12px;
   font-weight: 400;
@@ -643,7 +642,7 @@ mat-icon {
 }
 
 .number-label {
-  width: 8px; // match your .tooth-box width
+  width: 8px; 
   text-align: center;
   font-size: 12px;
   font-weight: 400;
@@ -653,7 +652,7 @@ mat-icon {
 .second-box.selected {
   background-color: #FF6E00;
   color: white;
-  border: 1px solid #FF6E00; /* ✅ Orange border when selected */
+  border: 1px solid #FF6E00; 
 }
 
 .tooth-row-wrapper {
@@ -667,10 +666,9 @@ mat-icon {
   border-right: none;
 }
 
-/* Top row divider — exceeds top edge slightly */
 .vertical-divider.top-divider {
   position: absolute;
-  top: -4px; /* push upward */
+  top: -4px; 
   left: 50%;
   transform: translateX(-1px);
   height: 65px;
@@ -678,7 +676,6 @@ mat-icon {
   z-index: 2;
 }
 
-/* Bottom row divider — exceeds bottom edge slightly */
 .vertical-divider.bottom-divider {
   position: absolute;
   top: 0;
@@ -713,12 +710,12 @@ mat-icon {
   display: block;
   width: 100%;
   text-align: left;
-  align-self: flex-start;   /* beats parent centering in flex */
+  align-self: flex-start;   
   margin: 6px 0 12px 0;
   padding-left: 5px;
-  font-size: 11px;      // match your other errors
+  font-size: 11px;      
   font-weight: 400;
-  color: #f44336;          // Material Red 500 (or your custom error color)
+  color: #f44336;          
   letter-spacing: 0;
   margin-top: -10px;
 }
@@ -728,8 +725,8 @@ mat-icon {
   left: 50%;
   transform: translateX(-50%);
   bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  width: calc(100% - 32px);   /* side gutters on small screens */
-  max-width: 720px;           /* match your .health-form-card width */
+  width: calc(100% - 32px); 
+  max-width: 720px;          
   padding: 8px 0;
   background: linear-gradient(180deg, rgba(255,255,255,0), #fff);
   z-index: 1000;
@@ -752,9 +749,9 @@ mat-icon {
   display: inline-block;
   padding: 6px 14px;
   border-radius: 9999px;
-  align-items: center;     /* vertical center */
+  align-items: center;    
   justify-content: center;
-  background: #ff7a1a;   // match your brand orange
+  background: #ff7a1a;   
   color: #fff;
   font-weight: 400;
   height:20px;
@@ -767,17 +764,11 @@ mat-icon {
   background-color: white !important;
   color: black !important;
 }
-
-
 }
 
-/* Put this in health-form.scss (the component SCSS) */
-
-/* White surface + black text */
 ::ng-deep .mat-mdc-dialog-surface {
   background-color: #fff !important;
 }
-
 
 ::ng-deep .mat-mdc-dialog-title { 
  color: #000 !important;
@@ -786,9 +777,8 @@ mat-icon {
 ::ng-deep .mat-mdc-dialog-content p {
   color: #000 !important;}
 
-/* --- Orange flat button (mat-flat-button) --- */
 .btn-orange.mat-mdc-unelevated-button:not(:disabled) {
-  background-color: #FF6E00;               /* orange */
+  background-color: #FF6E00;               
   color: #ffffff;
   height: 35px;  
   border-radius: 9px;
