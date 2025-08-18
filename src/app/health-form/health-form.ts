@@ -126,7 +126,17 @@ export class HealthForm implements OnInit, AfterViewInit {
       doctorLastName: ['', Validators.required],
       doctorStreet: ['', Validators.required],
       doctorStreetNo: ['', Validators.required],
-      doctorCity: ['', Validators.required]
+        doctorCity: ['', [
+    Validators.required,
+    (ctrl: AbstractControl) => {
+      const v = ctrl.value;
+      // valid if object with 4-digit code
+      if (v && typeof v === 'object' && /^\d{4}$/.test(v.code ?? '')) return null;
+      // optional: allow plain 4-digit string too
+      if (typeof v === 'string' && /^\d{4}$/.test(v)) return null;
+      return { zipInvalid: true };
+    }
+  ]]
   }),
 
     //Q6
@@ -449,7 +459,17 @@ addCondition() {
     doctorLastName:  ['', Validators.required],
     doctorStreet: ['', Validators.required],
     doctorStreetNo:  ['', Validators.required],
-    doctorCity:   ['', Validators.required]
+    doctorCity: ['', [
+    Validators.required,
+    (ctrl: AbstractControl) => {
+      const v = ctrl.value;
+      // valid if object with 4-digit code
+      if (v && typeof v === 'object' && /^\d{4}$/.test(v.code ?? '')) return null;
+      // optional: allow plain 4-digit string too
+      if (typeof v === 'string' && /^\d{4}$/.test(v)) return null;
+      return { zipInvalid: true };
+    }
+  ]]
   }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
 
   // Keep endDate revalidated if startDate changes
@@ -495,7 +515,15 @@ addIllness() {
     doctorLastName:  ['', Validators.required],
     doctorStreet:    ['', Validators.required],
     doctorStreetNo:  ['', Validators.required],
-    doctorCity:      ['', Validators.required]
+    doctorCity: ['', [
+    Validators.required,
+    (ctrl: AbstractControl) => {
+      const v = ctrl.value;
+      if (v && typeof v === 'object' && /^\d{4}$/.test(v.code ?? '')) return null;
+      if (typeof v === 'string' && /^\d{4}$/.test(v)) return null;
+      return { zipInvalid: true };
+    }
+  ]]
   }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
 
   group.get('startDate')!.valueChanges.subscribe(() => {
@@ -536,7 +564,17 @@ addTreatment() {
     doctorLastName:  ['', Validators.required],
     doctorStreet:    ['', Validators.required],
     doctorStreetNo:  ['', Validators.required],
-    doctorCity:      ['', Validators.required]
+    doctorCity: ['', [
+    Validators.required,
+    (ctrl: AbstractControl) => {
+      const v = ctrl.value;
+      // valid if object with 4-digit code
+      if (v && typeof v === 'object' && /^\d{4}$/.test(v.code ?? '')) return null;
+      // optional: allow plain 4-digit string too
+      if (typeof v === 'string' && /^\d{4}$/.test(v)) return null;
+      return { zipInvalid: true };
+    }
+  ]]
   }, { validators: this.dateRangeValidator('startDate','endDate') }); // ← ADD
 
   group.get('startDate')!.valueChanges.subscribe(() => {
@@ -677,7 +715,6 @@ get totalSteps(): number {
 }
 
 nextFrom(step: number) {
-  console.log('nextFrom fired at step', step, 'total=', this.totalSteps);
   const next = step + 1;
 
   // Handle the last step (22)

@@ -281,8 +281,6 @@
                 placeholder="PLZ"
                 type="text"
                 [matAutocomplete]="plzAuto"
-                inputmode="text"
-                pattern="\d*"
               />
               <mat-autocomplete
                 #plzAuto="matAutocomplete"
@@ -301,12 +299,16 @@
               <mat-error *ngIf="condGroup.get('doctorCity')?.touched && condGroup.get('doctorCity')?.hasError('required')">
                 Erforderlich
               </mat-error>
+
+              <mat-error *ngIf="condGroup.get('doctorCity')?.touched 
+                    && condGroup.get('doctorCity')?.hasError('zipInvalid')">
+                PLZ muss genau 4 Ziffern enthalten
+              </mat-error>
             </mat-form-field>
           </div>
-        </div> <!-- end condition-entry -->
-      </div> <!-- end conditions list -->
+        </div> 
+      </div> 
 
-      <!-- Add-condition button INSIDE this panel -->
       <div class="panel-actions">
         <button mat-flat-button color="primary" class="add-condition-btn" (click)="addCondition()">
           + Krankheit erfassen
@@ -432,6 +434,7 @@
                   [matDatepicker]="endPicker"
                   formControlName="endDate"
                   placeholder="TT.MM.JJJJ"
+                  [min]="illGroup.get('startDate')?.value" 
                 />
                 <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
                 <mat-datepicker #endPicker></mat-datepicker>
@@ -541,8 +544,6 @@
                 placeholder="PLZ"
                 type="text"
                 [matAutocomplete]="plzAuto"
-                inputmode="text"
-                pattern="\d*"
               />
               <mat-autocomplete
                 #plzAuto="matAutocomplete"
@@ -561,23 +562,26 @@
               <mat-error *ngIf="illGroup.get('doctorCity')?.touched && illGroup.get('doctorCity')?.hasError('required')">
                 Erforderlich
               </mat-error>
+
+              <mat-error *ngIf="illGroup.get('doctorCity')?.touched 
+                    && illGroup.get('doctorCity')?.hasError('zipInvalid')">
+                PLZ muss genau 4 Ziffern enthalten
+              </mat-error>
             </mat-form-field>
           </div>
 
-        </div> <!-- end condition-entry -->
-      </div> <!-- end conditions list -->
+        </div> 
+      </div>
 
-      <!-- Add-illness button INSIDE this panel -->
       <div class="panel-actions">
         <button mat-flat-button color="primary" class="add-condition-btn" (click)="addIllness()">
           + Krankheit erfassen
         </button>
       </div>
 
-    </div> <!-- /#illBlock -->
+    </div> 
   </div>
 
-  <!-- NEXT button: only visible if this is the current step -->
   <div class="panel-actions" *ngIf="currentStep === 3 && !isStepDone(3)">
     <button type="button" class="next-button" mat-flat-button color="primary" (click)="nextFrom(3)">
       Weiter
@@ -727,6 +731,7 @@
                   [matDatepicker]="endPicker"
                   formControlName="endDate"
                   placeholder="MM.TT.JJJJ"
+                  [min]="treatGroup.get('startDate')?.value" 
                 />
                 <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
                 <mat-datepicker #endPicker></mat-datepicker>
@@ -838,8 +843,6 @@
                 placeholder="PLZ"
                 type="text"
                 [matAutocomplete]="plzAuto"
-                inputmode="text"
-                pattern="\d*"
               />
               <mat-autocomplete
                 #plzAuto="matAutocomplete"
@@ -858,11 +861,16 @@
               <mat-error *ngIf="treatGroup.get('doctorCity')?.touched && treatGroup.get('doctorCity')?.hasError('required')">
                 Erforderlich
               </mat-error>
+
+              <mat-error *ngIf="treatGroup.get('doctorCity')?.touched 
+                    && treatGroup.get('doctorCity')?.hasError('zipInvalid')">
+                PLZ muss genau 4 Ziffern enthalten
+              </mat-error>
             </mat-form-field>
           </div>
 
-        </div> <!-- end condition-entry -->
-      </div> <!-- end conditions list -->
+        </div>
+      </div> 
 
       <div class="panel-actions">
         <button mat-flat-button color="primary" class="add-condition-btn" (click)="addTreatment()">
@@ -984,8 +992,6 @@
           placeholder="PLZ"
           type="text"
           [matAutocomplete]="plzAutoDoc"
-          inputmode="text"
-          pattern="\d*"
         />
 
         <mat-autocomplete
@@ -1008,6 +1014,11 @@
 
         <mat-error *ngIf="form.get('doctorInfo.doctorCity')?.touched && form.get('doctorInfo.doctorCity')?.hasError('required')">
           Erforderlich
+        </mat-error>
+
+         <mat-error *ngIf="form.get('doctorInfo.doctorCity')?.touched 
+                    && form.get('doctorInfo.doctorCity')?.hasError('zipInvalid')">
+          PLZ muss genau 4 Ziffern enthalten
         </mat-error>
       </mat-form-field>
     </div>
